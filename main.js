@@ -78,28 +78,100 @@ window.resetGame = function() {
     spawnFruit();
 }
 
-// 6. 마우스 이동 처리
-window.addEventListener('mousemove', (e) => {
+// --- [추가] 효과음 재생 함수 ---
+function playSound(id) {
+    const sound = document.getElementById(id);
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {}); // 첫 터치 전 재생 차단 방지
+    }
+}
+
+// --- [수정] 좌표 계산 및 입력 처리 ---
+function handleInputMove(e) {
     if (currentFruit && currentFruit.isStatic && !isGameOver) {
-        const rect = render.canvas.getBoundingClientRect();
-        let x = e.clientX - rect.left;
+        const rect = container.getBoundingClientRect();
+        // 터치면 touches[0], 마우스면 clientX 사용
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let x = clientX - rect.left;
+        
         const level = parseInt(currentFruit.label.split('_')[1]);
         const radius = FRUITS[level - 1].radius;
+        
+        // 벽 안쪽으로 제한
         x = Math.max(40 + radius, Math.min(360 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
-});
+}
 
-// 7. 클릭 처리
-window.addEventListener('click', (e) => {
+function handleInputEnd(e) {
+    // 리셋 버튼 클릭 시에는 과일이 떨어지지 않게 방지
     if (e.target.id === 'reset-btn') return;
 
     if (currentFruit && canDrop && !isGameOver) {
         canDrop = false;
         Body.setStatic(currentFruit, false);
+        playSound('sound-drop'); // 떨어질 때 소리
         currentFruit = null;
         setTimeout(spawnFruit, 1000);
     }
+}
+
+// --- [수정] 모바일 터치 및 마우스 이벤트 통합 리스너 ---
+// mousemove/touchmove: 과일 따라다니기
+container.addEventListener('mousemove', handleInputMove);
+container.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // 스크롤 방지
+    handleInputMove(e);
+}, { passive: false });
+
+// mousedown/touchstart: 과일 떨어뜨리기
+container.addEventListener('mousedown', handleInputEnd);
+container.addEventListener('touchstart', (e) => {
+    // 리셋 버튼이 아니면 게임 로직 실행
+    if (e.target.id !== 'reset-btn') {
+        e.preventDefault();
+        handleInputEnd(e);
+    }
+}, { passive: false });
+
+// --- [수정] 8번 충돌 로직에 소리 추가 ---
+Events.on(engine, 'collisionStart', (event) => {
+    event.pairs.forEach((pair) => {
+        const { bodyA, bodyB } = pair;
+        if (bodyA.label && bodyB.label && bodyA.label.startsWith('fruit_') && bodyA.label === bodyB.label) {
+            if (bodyA.isMerging || bodyB.isMerging) return;
+            const level = parseInt(bodyA.label.split('_')[1]);
+            if (level < 11) {
+                bodyA.isMerging = true; bodyB.isMerging = true;
+                const midX = (bodyA.position.x + bodyB.position.x) / 2;
+                const midY = (bodyA.position.y + bodyB.position.y) / 2;
+                
+                playSound('sound-merge'); // 합쳐질 때 소리
+                Composite.remove(world, [bodyA, bodyB]);
+                Composite.add(world, createFruit(midX, midY, level + 1));
+                
+                score += FRUITS[level - 1].score;
+                document.getElementById('score').innerText = score;
+            }
+        }
+    });
+});
+
+// --- [수정] 9번 게임오버 로직에 소리 및 엔딩창 연동 ---
+Events.on(engine, 'afterUpdate', () => {
+    if (isGameOver) return;
+    const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
+    for (let fruit of fruits) {
+        if (fruit.position.y < topSensorY && Math.abs(fruit.velocity.y) < 0.2) {
+            isGameOver = true;
+            playSound('sound-gameover'); // 게임오버 소리
+            const overLayer = document.getElementById('game-over');
+            overLayer.style.display = 'flex'; // 엔딩창 보이기
+            document.getElementById('final-score').innerText = score;
+        }
+    }
+});
 });
 
 // 8. 충돌(합성) 로직
