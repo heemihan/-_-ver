@@ -45,26 +45,35 @@ let isGameOver = false;
 let currentFruit = null;
 let canDrop = true;
 
-// 4. 캐릭터 생성 함수
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
-    const indexStr = String(level - 1).padStart(2, '0'); 
-    const texturePath = `asset/fruit${indexStr}.png`; 
+    const indexStr = String(level - 1).padStart(2, '0');
+    // 경로 앞에 ./를 붙여 현재 폴더 기준임을 명확히 합니다.
+    const texturePath = './asset/fruit' + indexStr + '.png';
+
+    // [수정] 이미지 크기 계산 로직
+    // 과일 반지름(radius)이 20일 때, 지름은 40입니다.
+    // 만약 이미지 원본이 100px이라면 0.4 배율이 되어야 합니다.
+    // 이미지 원본 크기에 맞춰 100 혹은 128 등으로 숫자를 바꿔보세요.
+    const imageBaseSize = 100; // 이 숫자를 이미지 원본 크기(px)에 맞춰 조정하세요.
+    const scale = (fruitData.radius * 2) / imageBaseSize;
 
     const fruit = Bodies.circle(x, y, fruitData.radius, {
-        label: `fruit_${level}`,
+        label: 'fruit_' + level,
         isStatic: isStatic,
         restitution: 0.3,
-        render: {
-            sprite: {
-                texture: texturePath,
-                xScale: 1,
-                yScale: 1
-            }
+        friction: 0.1,
+        render: { 
+            sprite: { 
+                texture: texturePath, 
+                xScale: scale, 
+                yScale: scale 
+            } 
         }
     });
     fruit.isMerging = false;
     return fruit;
+}
 }
 
 function spawnFruit() {
