@@ -54,7 +54,7 @@ function createFruit(x, y, level, isStatic = false) {
     // [중요] 이미지가 안 보인다면 이 숫자를 이미지 원본 px 크기에 맞춰보세요.
     // 보통 수박게임 에셋은 100px ~ 400px 사이입니다. 
     // 이미지가 너무 작게 보이면 이 숫자를 줄이고, 너무 크면 늘리세요.
-    const imageBaseSize = 100; 
+    const imageBaseSize = 50; 
     const scale = (fruitData.radius * 2) / imageBaseSize;
 
     const fruit = Bodies.circle(x, y, fruitData.radius, {
