@@ -2,6 +2,7 @@ const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
 const engine = Engine.create();
 const world = engine.world;
+const container = document.getElementById('game-container');
 
 // 1. 렌더러 설정
 const render = Render.create({
@@ -26,17 +27,25 @@ Composite.add(world, [ground, leftWall, rightWall]);
 
 // 3. 데이터 및 상태 변수
 const FRUITS = [
-    { radius: 20, score: 2 }, { radius: 30, score: 4 }, { radius: 45, score: 8 },
-    { radius: 55, score: 16 }, { radius: 70, score: 32 }, { radius: 85, score: 64 },
-    { radius: 100, score: 128 }, { radius: 120, score: 256 }, { radius: 140, score: 512 },
-    { radius: 160, score: 1024 }, { radius: 190, score: 2048 }
+    { radius: 17.5, score: 2 }, { radius: 27.5, score: 4 }, { radius: 42.5, score: 8 },
+    { radius: 52.5, score: 16 }, { radius: 67.5, score: 32 }, { radius: 82.5, score: 64 },
+    { radius: 97.5, score: 128 }, { radius: 117.5, score: 256 }, { radius: 137.5, score: 512 },
+    { radius: 157.5, score: 1024 }, { radius: 187.5, score: 2048 }
 ];
 
 let score = 0;
 let isGameOver = false;
 let currentFruit = null;
 let canDrop = true;
+let isDragging = false;
 
+//좌표 계산 함수
+function getInputX(e) {
+    const rect = container.getBoundingClientRect();
+    // 터치 이벤트인 경우 e.touches[0], 마우스인 경우 e.clientX 사용
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return clientX - rect.left;
+}
 // 4. 캐릭터 생성 함수
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
@@ -101,6 +110,39 @@ window.addEventListener('click', (e) => {
         setTimeout(spawnFruit, 1000);
     }
 });
+    //조작 로직
+function handleMove(e) {
+    if (isDragging && currentFruit && !isGameOver) {
+        let x = getInputX(e);
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const radius = FRUITS[level - 1].radius;
+        
+        // 터치 지점이 벽 밖으로 나가지 않게 제한
+        x = Math.max(radius, Math.min(400 - radius, x));
+        Body.setPosition(currentFruit, { x: x, y: 80 });
+    }
+}
+
+function handleStart(e) {
+    if (e.target.id === 'reset-btn' || isGameOver || !canDrop) return;
+    isDragging = true;
+    handleMove(e); // 터치한 순간 그 위치로 과일 이동
+}
+
+function handleEnd() {
+    if (isDragging && currentFruit) {
+        isDragging = false;
+        canDrop = false; // 중복 드롭 방지
+        Body.setStatic(currentFruit, false); // 낙하 시작
+        
+        // 효과음 재생 (HTML에 sound-drop ID가 있는 경우)
+        const sound = document.getElementById('sound-drop');
+        if(sound) { sound.currentTime = 0; sound.play().catch(()=>{}); }
+
+        currentFruit = null;
+        setTimeout(spawnFruit, 1000); // 1초 뒤 다음 과일 생성
+    }
+}
 
 // 8. 충돌(합성) 로직
 Events.on(engine, 'collisionStart', (event) => {
