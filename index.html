@@ -181,7 +181,7 @@
         }, { passive: false });
 
         window.addEventListener('mousedown', handleDrop);
-        window.addEventListener('touchstart', (e) => {
+        window.addEventListener('touchend', (e) => {
             // 터치 시 리셋 버튼인 경우 무시하고 버튼 클릭만 실행되게 함
             if(e.target.id === 'reset-btn') return;
             handleDrop(e);
