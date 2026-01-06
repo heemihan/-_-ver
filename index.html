@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>수박 게임 - 최종 수정본</title>
+    <title>수박 게임 - 최종 복구본</title>
     <style>
         body {
             margin: 0; padding: 0;
@@ -43,30 +43,17 @@
         }
 
         .game-over {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85); color: white;
-            display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-            z-index: 200; text-align: center;
-        }
-
-        .game-over h1 { font-size: 40px; margin-bottom: 10px; }
-        .game-over p { font-size: 20px; margin-bottom: 20px; }
-        .game-over button {
-            padding: 15px 30px; font-size: 18px; cursor: pointer;
-            background: #ffcc00; border: none; border-radius: 10px;
-            font-weight: bold; color: #000;
+            padding: 40px; text-align: center; border-radius: 20px;
+            display: none; z-index: 200;
         }
 
         canvas { display: block; position: absolute; top: 0; left: 0; }
     </style>
 </head>
 <body>
-
-    <audio id="sound-drop" src="asset/drop.mp3" preload="auto"></audio>
-    <audio id="sound-merge" src="asset/merge.mp3" preload="auto"></audio>
-    <audio id="sound-gameover" src="asset/gameover.mp3" preload="auto"></audio>
 
     <div id="game-container">
         <div id="ui-layer">
@@ -101,18 +88,17 @@
         const wallOptions = { isStatic: true, render: { visible: false } };
         const groundY = 550; 
         const ground = Bodies.rectangle(200, groundY + 30, 400, 60, wallOptions);
-        const leftWall = Bodies.rectangle(0, 300, 10, 600, wallOptions);
-        const rightWall = Bodies.rectangle(400, 300, 10, 600, wallOptions);
+        const leftWall = Bodies.rectangle(40, 300, 10, 600, wallOptions);
+        const rightWall = Bodies.rectangle(360, 300, 10, 600, wallOptions);
         const topSensorY = 130; 
 
         Composite.add(world, [ground, leftWall, rightWall]);
 
-        // [수정] 반지름을 일괄적으로 2.5px씩 줄임 (지름 기준 5px 감소)
         const FRUITS = [
-            { radius: 17.5, score: 2 }, { radius: 27.5, score: 4 }, { radius: 42.5, score: 8 },
-            { radius: 52.5, score: 16 }, { radius: 67.5, score: 32 }, { radius: 82.5, score: 64 },
-            { radius: 97.5, score: 128 }, { radius: 117.5, score: 256 }, { radius: 137.5, score: 512 },
-            { radius: 157.5, score: 1024 }, { radius: 187.5, score: 2048 }
+            { radius: 20, score: 2 }, { radius: 30, score: 4 }, { radius: 45, score: 8 },
+            { radius: 55, score: 16 }, { radius: 70, score: 32 }, { radius: 85, score: 64 },
+            { radius: 100, score: 128 }, { radius: 120, score: 256 }, { radius: 140, score: 512 },
+            { radius: 160, score: 1024 }, { radius: 190, score: 2048 }
         ];
 
         let score = 0;
@@ -120,18 +106,11 @@
         let currentFruit = null;
         let canDrop = true;
 
-        // 효과음 재생 함수
-        function playSound(id) {
-            const sound = document.getElementById(id);
-            if (sound) {
-                sound.currentTime = 0;
-                sound.play().catch(() => {}); 
-            }
-        }
-
+        // 과일 생성 함수 보완
         function createFruit(x, y, level, isStatic = false) {
             const fruitData = FRUITS[level - 1];
             const indexStr = String(level - 1).padStart(2, '0');
+            // 경로를 명확하게 지정
             const texturePath = './asset/fruit' + indexStr + '.png';
 
             const fruit = Bodies.circle(x, y, fruitData.radius, {
@@ -141,9 +120,8 @@
                 render: { 
                     sprite: { 
                         texture: texturePath, 
-                        // 작아진 물리 크기에 맞춰 이미지 배율 조정 (가정: 원본 이미지가 기존 반지름 기준일 때)
-                        xScale: (fruitData.radius * 2) / ( (fruitData.radius + 2.5) * 2 ), 
-                        yScale: (fruitData.radius * 2) / ( (fruitData.radius + 2.5) * 2 )
+                        xScale: 1, 
+                        yScale: 1 
                     } 
                 }
             });
@@ -160,7 +138,6 @@
         }
 
         window.resetGame = function() {
-            // 새로고침 대신 상태 초기화
             const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_'));
             Composite.remove(world, fruits);
             score = 0; isGameOver = false;
@@ -171,6 +148,7 @@
 
         function getInputX(e) {
             const rect = container.getBoundingClientRect();
+            // 터치와 마우스 좌표를 모두 고려
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             return clientX - rect.left;
         }
@@ -180,7 +158,7 @@
                 let x = getInputX(e);
                 const level = parseInt(currentFruit.label.split('_')[1]);
                 const radius = FRUITS[level - 1].radius;
-                x = Math.max(radius, Math.min(400 - radius, x));
+                x = Math.max(45 + radius, Math.min(355 - radius, x));
                 Body.setPosition(currentFruit, { x: x, y: 80 });
             }
         };
@@ -190,23 +168,22 @@
             if (currentFruit && canDrop && !isGameOver) {
                 canDrop = false;
                 Body.setStatic(currentFruit, false);
-                playSound('sound-drop'); // 떨어질 때 소리
                 currentFruit = null;
                 setTimeout(spawnFruit, 1000);
             }
         };
 
-        // 모바일 터치 최적화 등록
-        container.addEventListener('mousemove', handleMove);
-        container.addEventListener('touchmove', (e) => {
+        // 이벤트 리스너 통합 관리
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('touchmove', (e) => {
             if(e.cancelable) e.preventDefault();
             handleMove(e);
         }, { passive: false });
 
-        container.addEventListener('mousedown', handleDrop);
-        container.addEventListener('touchstart', (e) => {
+        window.addEventListener('mousedown', handleDrop);
+        window.addEventListener('touchstart', (e) => {
+            // 터치 시 리셋 버튼인 경우 무시하고 버튼 클릭만 실행되게 함
             if(e.target.id === 'reset-btn') return;
-            if(e.cancelable) e.preventDefault();
             handleDrop(e);
         }, { passive: false });
 
@@ -220,11 +197,8 @@
                         bodyA.isMerging = true; bodyB.isMerging = true;
                         const midX = (bodyA.position.x + bodyB.position.x) / 2;
                         const midY = (bodyA.position.y + bodyB.position.y) / 2;
-                        
-                        playSound('sound-merge'); // 합쳐질 때 소리
                         Composite.remove(world, [bodyA, bodyB]);
                         Composite.add(world, createFruit(midX, midY, level + 1));
-                        
                         score += FRUITS[level - 1].score;
                         document.getElementById('score').innerText = score;
                     }
@@ -238,8 +212,7 @@
                 for (let fruit of fruits) {
                     if (fruit.position.y < topSensorY && Math.abs(fruit.velocity.y) < 0.2) {
                         isGameOver = true;
-                        playSound('sound-gameover'); // 게임오버 소리
-                        document.getElementById('game-over').style.display = 'flex';
+                        document.getElementById('game-over').style.display = 'block';
                         document.getElementById('final-score').innerText = score;
                     }
                 }
