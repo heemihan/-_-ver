@@ -12,6 +12,22 @@
             overflow: hidden; font-family: 'Pretendard', sans-serif;
             touch-action: none; overscroll-behavior: none;
         }
+        <audio id="sound-drop" src="asset/drop.mp3" preload="auto"></audio>
+<audio id="sound-merge" src="asset/merge.mp3" preload="auto"></audio>
+<audio id="sound-gameover" src="asset/gameover.mp3" preload="auto"></audio>
+
+<div id="game-container">
+    <div id="ui-layer">
+        <div class="score-board">SCORE: <span id="score">0</span></div>
+        <img src="asset/resetGame.png" id="reset-btn" onclick="resetGame()" alt="Reset">
+    </div>
+    
+    <div id="game-over" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 200; text-align: center;">
+        <h1 style="font-size: 40px; margin-bottom: 10px;">GAME OVER</h1>
+        <p style="font-size: 20px; margin-bottom: 20px;">최종 점수: <span id="final-score">0</span></p>
+        <button onclick="resetGame()" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background: #ffcc00; border: none; border-radius: 10px; font-weight: bold; color: #000;">다시 도전</button>
+    </div>
+</div>
 
         #game-container {
             position: relative;
