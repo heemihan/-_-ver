@@ -25,11 +25,19 @@ const topSensorY = 100;
 Composite.add(world, [ground, leftWall, rightWall]);
 
 // 3. 데이터 및 상태 변수
+// 기존 대비 0.8배 축소 예시
 const FRUITS = [
-    { radius: 20, score: 2 }, { radius: 30, score: 4 }, { radius: 45, score: 8 },
-    { radius: 55, score: 16 }, { radius: 70, score: 32 }, { radius: 85, score: 64 },
-    { radius: 100, score: 128 }, { radius: 120, score: 256 }, { radius: 140, score: 512 },
-    { radius: 160, score: 1024 }, { radius: 190, score: 2048 }
+    { radius: 16, score: 2 },  // 20 -> 16
+    { radius: 24, score: 4 },  // 30 -> 24
+    { radius: 36, score: 8 },  // 45 -> 36
+    { radius: 44, score: 16 }, // 55 -> 44
+    { radius: 56, score: 32 }, // 70 -> 56
+    { radius: 68, score: 64 }, // 85 -> 68
+    { radius: 80, score: 128 },// 100 -> 80
+    { radius: 96, score: 256 },// 120 -> 96
+    { radius: 112, score: 512 },// 140 -> 112
+    { radius: 128, score: 1024 },// 160 -> 128
+    { radius: 152, score: 2048 } // 190 -> 152
 ];
 
 let score = 0;
