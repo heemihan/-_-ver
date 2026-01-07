@@ -32,7 +32,7 @@ const render = Render.create({
     engine: engine,
     options: {
         width: 400, height: 600,
-        wireframes:true , background: 'transparent'
+        wireframes:false , background: 'transparent'
     }
 });
 
@@ -62,6 +62,18 @@ function createFruit(x, y, level, isStatic = false) {
                 }
             }
     });
+     // [핵심 로직] 이미지 크기에 맞춰 스케일 자동 조정
+    const img = new Image();
+    img.src = texturePath;
+
+    img.onload = function() {
+        const diameter = fruitData.radius * 2;
+        const scale = diameter / img.width;
+
+          fruit.render.sprite.xScale = scale;
+        fruit.render.sprite.yScale = scale;
+    };
+    
     fruit.isMerging = false;
     return fruit;
 }
