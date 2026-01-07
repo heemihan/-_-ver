@@ -55,7 +55,9 @@ function createFruit(x, y, level, isStatic = false) {
         isStatic: isStatic,
         restitution: 0.3,
         render: { 
-            sprite: { texture: texturePath, xScale: 1, yScale: 1 } 
+            sprite: { texture: texturePath,
+                xScale: (fruitData.radius * 2) / 512, 
+                yScale: (fruitData.radius * 2) / 512 
         }
     });
     fruit.isMerging = false;
