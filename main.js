@@ -5,7 +5,7 @@ const world = engine.world;
 const container = document.getElementById('game-container');
 
 // 상태 변수
-let currentSkinType = 'A'; // 'A' 또는 'B'
+let currentSkinType = 'A'; 
 let score = 0;
 let isGameOver = false;
 let currentFruit = null;
@@ -13,38 +13,32 @@ let canDrop = true;
 const mergeQueue = [];
 
 const FRUITS = [
-    { radius: 16, score: 2 },    // 00 
-    { radius: 24, score: 4 },    // 01 
-    { radius: 32, score: 8 },    // 02 
-    { radius: 46, score: 16 },   // 03 
-    { radius: 55, score: 32 },   // 04 
-    { radius: 55, score: 64 },   // 05 
-    { radius: 58, score: 128 },  // 06
-    { radius: 77, score: 256 }, // 07
-    { radius: 92, score: 512 }, // 08 
-    { radius: 92, score: 1024 },// 09
-    { radius: 122, score: 2048 } // 10 
+    { radius: 16, score: 2 },    // 01 
+    { radius: 24, score: 4 },    // 02 
+    { radius: 32, score: 8 },    // 03 
+    { radius: 46, score: 16 },   // 04 
+    { radius: 55, score: 32 },   // 05 
+    { radius: 55, score: 64 },   // 06 
+    { radius: 58, score: 128 },  // 07
+    { radius: 77, score: 256 },  // 08
+    { radius: 92, score: 512 },  // 09 
+    { radius: 92, score: 1024 }, // 10
+    { radius: 122, score: 2048 } // 11 (최종)
 ];
 
-// 렌더러 설정
+// 렌더러 및 벽 생성 로직 (기존과 동일)
 const render = Render.create({
     element: container,
     engine: engine,
-    options: {
-        width: 400, height: 600,
-        wireframes:false, background: 'transparent'
-    }
+    options: { width: 400, height: 600, wireframes: false, background: 'transparent' }
 });
 
-// 벽 생성
 const wallOptions = { isStatic: true, render: { visible: false } };
 const ground = Bodies.rectangle(200, 580, 400, 40, wallOptions);
 const leftWall = Bodies.rectangle(20, 300, 20, 600, wallOptions);
 const rightWall = Bodies.rectangle(380, 300, 20, 600, wallOptions);
 Composite.add(world, [ground, leftWall, rightWall]);
 
-
-// 캐릭터 생성 함수
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
     const indexStr = String(level - 1).padStart(2, '0');
@@ -55,23 +49,15 @@ function createFruit(x, y, level, isStatic = false) {
         label: 'fruit_' + level,
         isStatic: isStatic,
         restitution: 0.3,
-        render: {
-                sprite: {
-                    texture: texturePath,
-                    xScale: 1,
-                    yScale: 1
-                }
-            }
+        render: { sprite: { texture: texturePath, xScale: 1, yScale: 1 } }
     });
-     // [핵심 로직] 이미지 크기에 맞춰 스케일 자동 조정
+
     const img = new Image();
     img.src = texturePath;
-
     img.onload = function() {
         const diameter = fruitData.radius * 2;
         const scale = diameter / img.width;
-
-          fruit.render.sprite.xScale = scale * 1.05;
+        fruit.render.sprite.xScale = scale * 1.05;
         fruit.render.sprite.yScale = scale * 1.05;
     };
     
@@ -87,146 +73,7 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// UI 이벤트 리스너 등록
-document.getElementById('skin-btn').addEventListener('click', () => {
-    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
-    const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
-    
-    Composite.allBodies(world).forEach(body => {
-        if (body.label && body.label.startsWith('fruit_')) {
-            const level = body.label.split('_')[1];
-            body.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
-        }
-    });
-});
-
-document.getElementById('reset-btn').addEventListener('click', resetGame);
-document.getElementById('retry-btn').addEventListener('click', resetGame);
-
-function resetGame() {
-    location.reload();
-}
-
-// 입력 처리
-function getInputX(e) {
-    const rect = container.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return clientX - rect.left;
-}
-
-const handleMove = (e) => {
-    if (currentFruit && canDrop && !isGameOver) {
-        let x = getInputX(e);
-        const level = parseInt(currentFruit.label.split('_')[1]);
-        const radius = FRUITS[level - 1].radius;
-        x = Math.max(radius + 20, Math.min(380 - radius, x));
-        Body.setPosition(currentFruit, { x: x, y: 80 });
-    }
-};
-
-const handleDrop = (e) => {
-    // 버튼 클릭 시에는 무시 (이벤트 전파 방지)
-    if (e.target.closest('.top-btn-group') || e.target.tagName === 'BUTTON') return;
-    
-    if (currentFruit && canDrop && !isGameOver) {
-        canDrop = false;
-        Body.setStatic(currentFruit, false);
-        currentFruit = null;
-        setTimeout(spawnFruit, 1000);
-    }
-};
-
-container.addEventListener('mousemove', handleMove);
-container.addEventListener('touchmove', (e) => { 
-    if(e.cancelable) e.preventDefault(); 
-    handleMove(e); 
-}, { passive: false });
-container.addEventListener('mousedown', handleDrop);
-container.addEventListener('touchend', (e) => { 
-    handleDrop(e); 
-}, { passive: false });
-
-// 충돌 및 합성 루프
-Events.on(engine, 'collisionStart', (event) => {
-    event.pairs.forEach((pair) => {
-        const { bodyA, bodyB } = pair;
-        if (bodyA.label === bodyB.label && bodyA.label.startsWith('fruit_')) {
-            if (bodyA.isMerging || bodyB.isMerging) return;
-            const level = parseInt(bodyA.label.split('_')[1]);
-            if (level < 11) {
-                bodyA.isMerging = true; bodyB.isMerging = true;
-                mergeQueue.push({
-                    bodyA, bodyB, level,
-                    x: (bodyA.position.x + bodyB.position.x) / 2,
-                    y: (bodyA.position.y + bodyB.position.y) / 2
-                });
-            }
-        }
-    });
-});
-
-Events.on(engine, 'afterUpdate', () => {
-    while (mergeQueue.length > 0) {
-        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
-        if (Composite.allBodies(world).includes(bodyA)) {
-            Composite.remove(world, [bodyA, bodyB]);
-            Composite.add(world, createFruit(x, y, level + 1));
-            score += FRUITS[level - 1].score;
-            document.getElementById('score').innerText = score;
-        }
-    }
+// 엔딩 시퀀스 함수
 function startEndingSequence() {
-    isGameOver = true; // 게임 일시 정지 효과
-    const endingLayer = document.getElementById('ending-layer');
-    const gifContainer = document.getElementById('ending-gif-container');
-    const imgContainer = document.getElementById('ending-img-container');
-
-    // 1. 엔딩 레이어 표시 및 GIF 노출
-    endingLayer.style.display = 'block';
-
-    // 2. 3초 후 JPG로 교체
-    setTimeout(() => {
-        gifContainer.style.display = 'none';
-        imgContainer.style.display = 'block';
-    }, 3000);
-}
-
-// 되돌아가기 버튼 이벤트 (resetGame 함수 활용 또는 레이어 숨기기)
-document.getElementById('back-to-game').addEventListener('click', () => {
-    location.reload(); // 깔끔하게 처음부터 시작
-});
-
-Events.on(engine, 'afterUpdate', () => {
-    while (mergeQueue.length > 0) {
-        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
-        if (Composite.allBodies(world).includes(bodyA)) {
-            Composite.remove(world, [bodyA, bodyB]);
-            
-            const nextLevel = level + 1;
-            const newFruit = createFruit(x, y, nextLevel);
-            Composite.add(world, newFruit);
-            
-            score += FRUITS[level - 1].score;
-            document.getElementById('score').innerText = score;
-
-            // [추가] 11단계 달성 시 엔딩 체크
-            if (nextLevel === 11) {
-                setTimeout(startEndingSequence, 500); // 합성 이펙트를 잠시 보여준 뒤 실행
-            }
-        }
-    }
-    if (!isGameOver && !canDrop) {
-        const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
-        for (let fruit of fruits) {
-            if (fruit.position.y < 120 && Math.abs(fruit.velocity.y) < 0.2) {
-                isGameOver = true;
-                document.getElementById('game-over').style.display = 'block';
-                document.getElementById('final-score').innerText = score;
-            }
-        }
-    }
-});
-
-Render.run(render);
-Runner.run(Runner.create({ isFixed: true }), engine);
-spawnFruit();
+    isGameOver = true;
+    const
