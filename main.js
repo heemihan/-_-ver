@@ -13,17 +13,17 @@ let canDrop = true;
 const mergeQueue = [];
 
 const FRUITS = [
-    { radius: 12, score: 2 },   // 00 
-    { radius: 18, score: 4 },   // 01
-    { radius: 28, score: 8 },   // 02
-    { radius: 35, score: 16 },  // 03
-    { radius: 45, score: 32 },  // 04
-    { radius: 55, score: 64 },  // 05
-    { radius: 65, score: 128 }, // 06
-    { radius: 78, score: 256 }, // 07
-    { radius: 92, score: 512 }, // 08
-    { radius: 105, score: 1024 },// 09
-    { radius: 120, score: 2048 } // 10 
+    { radius: 10, score: 2 },   // 00 
+    { radius: 14, score: 4 },   // 01
+    { radius: 22, score: 8 },   // 02
+    { radius: 28, score: 16 },  // 03
+    { radius: 36, score: 32 },  // 04
+    { radius: 44, score: 64 },  // 05
+    { radius: 52, score: 128 }, // 06
+    { radius: 62, score: 256 }, // 07
+    { radius: 74, score: 512 }, // 08
+    { radius: 84, score: 1024 },// 09
+    { radius: 96, score: 2048 } // 10 
 ];
 
 // 렌더러 설정
@@ -54,11 +54,13 @@ function createFruit(x, y, level, isStatic = false) {
         label: 'fruit_' + level,
         isStatic: isStatic,
         restitution: 0.3,
-        render: { 
-            sprite: { texture: texturePath,
-                xScale: (fruitData.radius * 2) / 512, 
-                yScale: (fruitData.radius * 2) / 512} 
-        }
+        render: {
+                sprite: {
+                    texture: texturePath,
+                    xScale: 1,
+                    yScale: 1
+                }
+            }
     });
     fruit.isMerging = false;
     return fruit;
