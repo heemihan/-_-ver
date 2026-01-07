@@ -3,47 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>수박 게임 - 최종 통합본</title>
-   <style>
-    body {
-        margin: 0; padding: 0;
-        display: flex; justify-content: center; align-items: center;
-        height: 100vh; width: 100vw;
-        background-color: #1a1a1a;
-        overflow: hidden; touch-action: none;
-    }
-
-    #game-container {
-        position: relative;
-        width: 400px; height: 600px;
-        max-width: 100vw; max-height: 100vh;
-        box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
-        border: 4px solid #333; border-radius: 12px;
-        background: #ffeeb0 url('asset/background.png') no-repeat center;
-        background-size: 100% 100%;
-        overflow: hidden;
-        touch-action: none;
-    }
-
-    /* 캔버스가 부모 컨테이너 중앙에 오도록 고정 */
-    canvas {
-        display: block !important;
-        position: absolute !important;
-        top: 0;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-    }
-
-    #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
-    .score-board { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 28px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-    .top-btn-group { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; pointer-events: auto; z-index: 101; }
-    .top-btn { width: 40px; height: 40px; cursor: pointer; object-fit: contain; }
-    
-    #ending-layer { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; text-align: center; }
-</style>
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>수박 게임</title>
     <style>
         /* 1. 전체 화면 설정 */
@@ -77,12 +36,13 @@
             transform: translateX(-50%) !important;
         }
 
-        /* 4. UI 및 엔딩 레이어 */
+        /* 4. UI 및 레이어 설정 */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
         .score-board { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 28px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         .top-btn-group { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; pointer-events: auto; z-index: 101; }
         .top-btn { width: 40px; height: 40px; cursor: pointer; object-fit: contain; }
         
+        /* 5. 게임 오버 레이어 */
         .game-over {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -91,7 +51,16 @@
             display: none; z-index: 200; pointer-events: auto;
         }
 
-        #ending-layer { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; text-align: center; }
+        /* 6. 엔딩 레이어 */
+        #ending-layer { 
+            display: none; 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: #fff; 
+            z-index: 300; 
+            text-align: center; 
+        }
     </style>
 </head>
 <body>
@@ -100,14 +69,17 @@
             <img src="asset/imgchange.png" class="top-btn" id="skin-btn" alt="Skin">
             <img src="asset/resetGame.png" class="top-btn" id="reset-btn" alt="Reset">
         </div>
+
         <div id="ui-layer">
             <div class="score-board">SCORE: <span id="score">0</span></div>
         </div>
+
         <div id="game-over" class="game-over">
             <h1>GAME OVER</h1>
             <p>최종 점수: <span id="final-score">0</span></p>
             <button id="retry-btn" style="padding:10px 20px; cursor:pointer;">다시 도전</button>
         </div>
+
         <div id="ending-layer">
             <div id="ending-gif-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
                 <img src="asset/thank.gif" style="width: 100%; height: auto;">
@@ -118,6 +90,7 @@
             </div>
         </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="main.js"></script>
 </body>
