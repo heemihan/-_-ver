@@ -32,7 +32,7 @@ const render = Render.create({
     engine: engine,
     options: {
         width: 400, height: 600,
-        wireframes: false, background: 'transparent'
+        wireframes:true , background: 'transparent'
     }
 });
 
