@@ -31,9 +31,11 @@ Composite.add(world, [
     Bodies.rectangle(390, 300, 20, 600, wallOptions)
 ]);
 
+// [수정] 과일 생성 함수 - 경로 생성 방식 최적화
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
     const indexStr = String(level - 1).padStart(2, '0');
+    // currentSkinType이 'A'면 'fruit', 아니면 'skinB_fruit'
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     const texturePath = `./asset/${prefix}${indexStr}.png`;
 
@@ -62,23 +64,30 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// 스킨 변경 (이미지만 즉시 교체)
+// [수정] 스킨 변경 버튼 이벤트 - 즉각적인 텍스트 교체 로직 강화
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
+    // A -> B, B -> A 전환
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
+    // 1. 화면에 있는 모든 과일 이미지 변경
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
-            const level = body.label.split('_')[1];
-            body.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
+            const level = parseInt(body.label.split('_')[1]);
+            const indexStr = String(level - 1).padStart(2, '0');
+            body.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
         }
     });
 
+    // 2. 대기 중인(마우스/손가락에 달린) 과일 이미지 변경
     if (currentFruit) {
-        const level = currentFruit.label.split('_')[1];
-        currentFruit.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const indexStr = String(level - 1).padStart(2, '0');
+        currentFruit.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
     }
+    
+    console.log("Skin changed to:", currentSkinType); // 작동 확인용
 });
 
 function startEndingSequence() {
