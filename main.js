@@ -43,6 +43,7 @@ const leftWall = Bodies.rectangle(20, 300, 20, 600, wallOptions);
 const rightWall = Bodies.rectangle(380, 300, 20, 600, wallOptions);
 Composite.add(world, [ground, leftWall, rightWall]);
 
+
 // 캐릭터 생성 함수
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
@@ -174,7 +175,46 @@ Events.on(engine, 'afterUpdate', () => {
             document.getElementById('score').innerText = score;
         }
     }
+function startEndingSequence() {
+    isGameOver = true; // 게임 일시 정지 효과
+    const endingLayer = document.getElementById('ending-layer');
+    const gifContainer = document.getElementById('ending-gif-container');
+    const imgContainer = document.getElementById('ending-img-container');
 
+    // 1. 엔딩 레이어 표시 및 GIF 노출
+    endingLayer.style.display = 'block';
+
+    // 2. 3초 후 JPG로 교체
+    setTimeout(() => {
+        gifContainer.style.display = 'none';
+        imgContainer.style.display = 'block';
+    }, 3000);
+}
+
+// 되돌아가기 버튼 이벤트 (resetGame 함수 활용 또는 레이어 숨기기)
+document.getElementById('back-to-game').addEventListener('click', () => {
+    location.reload(); // 깔끔하게 처음부터 시작
+});
+
+Events.on(engine, 'afterUpdate', () => {
+    while (mergeQueue.length > 0) {
+        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
+        if (Composite.allBodies(world).includes(bodyA)) {
+            Composite.remove(world, [bodyA, bodyB]);
+            
+            const nextLevel = level + 1;
+            const newFruit = createFruit(x, y, nextLevel);
+            Composite.add(world, newFruit);
+            
+            score += FRUITS[level - 1].score;
+            document.getElementById('score').innerText = score;
+
+            // [추가] 11단계 달성 시 엔딩 체크
+            if (nextLevel === 11) {
+                setTimeout(startEndingSequence, 500); // 합성 이펙트를 잠시 보여준 뒤 실행
+            }
+        }
+    }
     if (!isGameOver && !canDrop) {
         const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
         for (let fruit of fruits) {
