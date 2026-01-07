@@ -76,4 +76,124 @@ function spawnFruit() {
 // 엔딩 시퀀스 함수
 function startEndingSequence() {
     isGameOver = true;
-    const
+    const endingLayer = document.getElementById('ending-layer');
+    const gifContainer = document.getElementById('ending-gif-container');
+    const imgContainer = document.getElementById('ending-img-container');
+
+    if (endingLayer) {
+        endingLayer.style.display = 'block';
+        setTimeout(() => {
+            if (gifContainer) gifContainer.style.display = 'none';
+            if (imgContainer) imgContainer.style.display = 'block';
+        }, 3000);
+    }
+}
+
+// 이벤트 리스너 설정
+document.getElementById('skin-btn').addEventListener('click', () => {
+    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+    const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
+    Composite.allBodies(world).forEach(body => {
+        if (body.label && body.label.startsWith('fruit_')) {
+            const level = body.label.split('_')[1];
+            body.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
+        }
+    });
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => location.reload());
+document.getElementById('retry-btn').addEventListener('click', () => location.reload());
+const backBtn = document.getElementById('back-to-game');
+if (backBtn) backBtn.addEventListener('click', () => location.reload());
+
+// 입력 처리 (handleMove, handleDrop 등은 기존과 동일하게 유지)
+function getInputX(e) {
+    const rect = container.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return clientX - rect.left;
+}
+
+const handleMove = (e) => {
+    if (currentFruit && canDrop && !isGameOver) {
+        let x = getInputX(e);
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const radius = FRUITS[level - 1].radius;
+        x = Math.max(radius + 20, Math.min(380 - radius, x));
+        Body.setPosition(currentFruit, { x: x, y: 80 });
+    }
+};
+
+const handleDrop = (e) => {
+    if (e.target.closest('.top-btn-group') || e.target.tagName === 'BUTTON') return;
+    if (currentFruit && canDrop && !isGameOver) {
+        canDrop = false;
+        Body.setStatic(currentFruit, false);
+        currentFruit = null;
+        setTimeout(spawnFruit, 1000);
+    }
+};
+
+container.addEventListener('mousemove', handleMove);
+container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
+container.addEventListener('mousedown', handleDrop);
+container.addEventListener('touchend', (e) => { handleDrop(e); }, { passive: false });
+
+// 충돌 감지
+Events.on(engine, 'collisionStart', (event) => {
+    event.pairs.forEach((pair) => {
+        const { bodyA, bodyB } = pair;
+        if (bodyA.label === bodyB.label && bodyA.label.startsWith('fruit_')) {
+            if (bodyA.isMerging || bodyB.isMerging) return;
+            const level = parseInt(bodyA.label.split('_')[1]);
+            if (level < 11) {
+                bodyA.isMerging = true; bodyB.isMerging = true;
+                mergeQueue.push({
+                    bodyA, bodyB, level,
+                    x: (bodyA.position.x + bodyB.position.x) / 2,
+                    y: (bodyA.position.y + bodyB.position.y) / 2
+                });
+            }
+        }
+    });
+});
+
+// 업데이트 루프 (통합본)
+Events.on(engine, 'afterUpdate', () => {
+    while (mergeQueue.length > 0) {
+        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
+        if (Composite.allBodies(world).includes(bodyA)) {
+            Composite.remove(world, [bodyA, bodyB]);
+            
+            const nextLevel = level + 1;
+            Composite.add(world, createFruit(x, y, nextLevel));
+            
+            score += FRUITS[level - 1].score;
+            document.getElementById('score').innerText = score;
+
+            // 11단계 달성 시 엔딩 체크
+            if (nextLevel === 11) {
+                setTimeout(startEndingSequence, 500);
+            }
+        }
+    }
+
+    // 게임 오버 체크
+    if (!isGameOver && !canDrop) {
+        const fruits = Composite.allBodies(world).filter(b => 
+            b.label && 
+            b.label.startsWith('fruit_') && 
+            !b.isStatic
+        );
+        for (let fruit of fruits) {
+           if (fruit.position.y < 120 && Math.abs(fruit.velocity.y) < 0.1) {
+                isGameOver = true;
+                document.getElementById('game-over').style.display = 'block';
+                document.getElementById('final-score').innerText = score;
+            }
+        }
+    }
+});
+
+Render.run(render);
+Runner.run(Runner.create({ isFixed: true }), engine);
+spawnFruit();
