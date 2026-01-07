@@ -39,8 +39,8 @@ const render = Render.create({
 // 벽 생성
 const wallOptions = { isStatic: true, render: { visible: false } };
 const ground = Bodies.rectangle(200, 580, 400, 40, wallOptions);
-const leftWall = Bodies.rectangle(10, 300, 20, 600, wallOptions);
-const rightWall = Bodies.rectangle(390, 300, 20, 600, wallOptions);
+const leftWall = Bodies.rectangle(20, 300, 20, 600, wallOptions);
+const rightWall = Bodies.rectangle(380, 300, 20, 600, wallOptions);
 Composite.add(world, [ground, leftWall, rightWall]);
 
 // 캐릭터 생성 함수
@@ -70,8 +70,8 @@ function createFruit(x, y, level, isStatic = false) {
         const diameter = fruitData.radius * 2;
         const scale = diameter / img.width;
 
-          fruit.render.sprite.xScale = scale;
-        fruit.render.sprite.yScale = scale;
+          fruit.render.sprite.xScale = scale * 1.05;
+        fruit.render.sprite.yScale = scale * 1.05;
     };
     
     fruit.isMerging = false;
