@@ -63,8 +63,8 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// 스킨 변경 로직 (수정 완료)
-document.getElementById('skin-btn').onclick = (e) => {
+// 스킨 변경 로직: 실시간 모든 오브젝트 텍스처 교체
+document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
@@ -72,7 +72,8 @@ document.getElementById('skin-btn').onclick = (e) => {
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
             const level = parseInt(body.label.split('_')[1]);
-            body.render.sprite.texture = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
+            const indexStr = String(level - 1).padStart(2, '0');
+            body.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
         }
     });
 
@@ -80,8 +81,9 @@ document.getElementById('skin-btn').onclick = (e) => {
         const level = parseInt(currentFruit.label.split('_')[1]);
         currentFruit.render.sprite.texture = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
     }
-};
+});
 
+// 엔딩 시퀀스
 function startEndingSequence() {
     isGameOver = true;
     document.getElementById('ending-layer').style.display = 'block';
@@ -91,7 +93,8 @@ function startEndingSequence() {
     }, 3000);
 }
 
-document.getElementById('reset-btn').onclick = () => location.reload();
+// 버튼 리스너
+document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
@@ -100,7 +103,8 @@ const handleMove = (e) => {
         const rect = container.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let x = clientX - rect.left;
-        const radius = FRUITS[parseInt(currentFruit.label.split('_')[1]) - 1].radius;
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const radius = FRUITS[level - 1].radius;
         x = Math.max(radius + 25, Math.min(375 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
