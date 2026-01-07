@@ -181,7 +181,31 @@ Events.on(engine, 'afterUpdate', () => {
             const nextLevel = level + 1;
             Composite.add(world, createFruit(x, y, nextLevel));
             score += FRUITS[level - 1].score;
-            document.getElementById('score').innerText = score;
+            document.getElementById('skin-btn').addEventListener('click', () => {
+                // 1. 현재 타입 토글 (A면 B로, B면 A로)
+    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+    
+    // 2. 파일 이름 앞부분(prefix) 결정
+    const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
+    
+    // 3. 화면에 있는 모든 과일 몸체(Body)를 찾아서 이미지만 교체
+    Composite.allBodies(world).forEach(body => {
+        if (body.label && body.label.startsWith('fruit_')) {
+            const level = body.label.split('_')[1]; // 과일 레벨 추출
+            const indexStr = String(level - 1).padStart(2, '0'); // 00, 01 형식
+            
+            // 이미지 경로만 변경
+            body.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
+        }
+    });
+
+    // 4. 다음에 떨어질 대기 중인 과일 이미지도 즉시 변경
+    if (currentFruit) {
+        const level = currentFruit.label.split('_')[1];
+        const indexStr = String(level - 1).padStart(2, '0');
+        currentFruit.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
+    }
+});
 
             if (nextLevel === 11) {
                 setTimeout(startEndingSequence, 500);
