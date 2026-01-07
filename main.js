@@ -41,7 +41,7 @@ function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
     const indexStr = String(level - 1).padStart(2, '0');
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
-    const texturePath = `asset/${prefix}${indexStr}.png`;
+    const texturePath = `./asset/${prefix}${indexStr}.png`;
 
     const fruit = Bodies.circle(x, y, fruitData.radius, {
         label: 'fruit_' + level,
@@ -71,7 +71,7 @@ document.getElementById('skin-btn').addEventListener('click', () => {
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
             const level = body.label.split('_')[1];
-            body.render.sprite.texture = `asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
+            body.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
         }
     });
 });
