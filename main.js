@@ -66,17 +66,16 @@ function spawnFruit() {
 
 // 캐릭터 변경 버튼 클릭 이벤트
 document.getElementById('skin-btn').addEventListener('click', (e) => {
-    e.stopPropagation(); // 드롭 이벤트와 겹치지 않게 방지
-    
-    // 상태 전환
+    e.stopPropagation();
+    // A <-> B 전환
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
-    // 1. 현재 화면에 있는 모든 과일 이미지 변경
+   // 1. 모든 과일 이미지 변경
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
-            const level = parseInt(body.label.split('_')[1]); // 1~11
-            const indexStr = String(level - 1).padStart(2, '0'); // 00~10
+            const level = parseInt(body.label.split('_')[1]); // 숫자로 변환
+            const indexStr = String(level - 1).padStart(2, '0');
             body.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
         }
     });
