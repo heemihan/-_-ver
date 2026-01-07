@@ -56,7 +56,6 @@ function createFruit(x, y, level, isStatic = false) {
         label: 'fruit_' + level,
         isStatic: isStatic,
         restitution: 0.3,
-        friction: 0.05,
         render: {
             sprite: {
                 texture: texturePath,
