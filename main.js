@@ -94,31 +94,64 @@ document.getElementById('reset-btn').onclick = () => location.reload();
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
+// 입력 좌표 계산 최적화
+function getInputX(e) {
+    const rect = container.getBoundingClientRect();
+    // 터치 이벤트와 마우스 이벤트 모두 대응
+    const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+    return clientX - rect.left;
+}
+
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
-        const rect = container.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let x = clientX - rect.left;
-        const radius = FRUITS[parseInt(currentFruit.label.split('_')[1]) - 1].radius;
+        // 모바일 브라우저의 화면 스크롤/새로고침 방지
+        if (e.cancelable) e.preventDefault(); 
+        
+        let x = getInputX(e);
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const radius = FRUITS[level - 1].radius;
+        
+        // 벽에 끼이지 않도록 여유값(25)을 준 범위 제한
         x = Math.max(radius + 25, Math.min(375 - radius, x));
+        
+        // 부드러운 위치 이동을 위해 Body.setPosition 사용
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
 };
 
 const handleDrop = (e) => {
+    // 버튼 클릭 시 드롭 방지
     if (e.target.closest('.top-btn-group') || e.target.tagName === 'BUTTON') return;
+    
     if (currentFruit && canDrop && !isGameOver) {
         canDrop = false;
         Body.setStatic(currentFruit, false);
         currentFruit = null;
+        
+        // 다음 과일 생성 전 대기 시간
         setTimeout(spawnFruit, 1000);
     }
 };
 
+// 이벤트 리스너 재등록 (중요: passive: false 설정)
+container.removeEventListener('mousemove', handleMove);
+container.removeEventListener('mousedown', handleDrop);
+
 container.addEventListener('mousemove', handleMove);
 container.addEventListener('mousedown', handleDrop);
-container.addEventListener('touchstart', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
-container.addEventListener('touchend', (e) => handleDrop(e));
+
+// 터치 이벤트는 브라우저 간섭을 막기 위해 { passive: false } 필수
+container.addEventListener('touchstart', (e) => {
+    handleMove(e);
+}, { passive: false });
+
+container.addEventListener('touchmove', (e) => {
+    handleMove(e);
+}, { passive: false });
+
+container.addEventListener('touchend', (e) => {
+    handleDrop(e);
+}, { passive: false });
 
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
