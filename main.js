@@ -64,21 +64,32 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// [수정] 스킨 변경 버튼 이벤트 - 즉각적인 텍스트 교체 로직 강화
+// 캐릭터 변경 버튼 클릭 이벤트
 document.getElementById('skin-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    // A -> B, B -> A 전환
+    e.stopPropagation(); // 드롭 이벤트와 겹치지 않게 방지
+    
+    // 상태 전환
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
-    // 1. 화면에 있는 모든 과일 이미지 변경
+    // 1. 현재 화면에 있는 모든 과일 이미지 변경
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
-            const level = parseInt(body.label.split('_')[1]);
-            const indexStr = String(level - 1).padStart(2, '0');
+            const level = parseInt(body.label.split('_')[1]); // 1~11
+            const indexStr = String(level - 1).padStart(2, '0'); // 00~10
             body.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
         }
     });
+
+    // 2. 대기 중인(위에 떠 있는) 과일 이미지 변경
+    if (currentFruit) {
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const indexStr = String(level - 1).padStart(2, '0');
+        currentFruit.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
+    }
+    
+    console.log("Skin changed to:", currentSkinType);
+});
 
     // 2. 대기 중인(마우스/손가락에 달린) 과일 이미지 변경
     if (currentFruit) {
