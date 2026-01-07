@@ -4,8 +4,7 @@ const engine = Engine.create();
 const world = engine.world;
 const container = document.getElementById('game-container');
 
-// 상태 변수
-let currentSkinType = 'A'; // 디폴트: fruit
+let currentSkinType = 'A'; // 디폴트 fruit
 let score = 0;
 let isGameOver = false;
 let currentFruit = null;
@@ -13,9 +12,9 @@ let canDrop = true;
 const mergeQueue = [];
 
 const FRUITS = [
-    { radius: 16, score: 2 },    { radius: 24, score: 4 },    { radius: 32, score: 8 },
-    { radius: 46, score: 16 },   { radius: 55, score: 32 },   { radius: 55, score: 64 },
-    { radius: 58, score: 128 },  { radius: 77, score: 256 },  { radius: 92, score: 512 },
+    { radius: 16, score: 2 }, { radius: 24, score: 4 }, { radius: 32, score: 8 },
+    { radius: 46, score: 16 }, { radius: 55, score: 32 }, { radius: 55, score: 64 },
+    { radius: 58, score: 128 }, { radius: 77, score: 256 }, { radius: 92, score: 512 },
     { radius: 92, score: 1024 }, { radius: 122, score: 2048 }
 ];
 
@@ -25,7 +24,6 @@ const render = Render.create({
     options: { width: 400, height: 600, wireframes: false, background: 'transparent' }
 });
 
-// 벽 생성
 const wallOptions = { isStatic: true, friction: 0, render: { visible: false } };
 Composite.add(world, [
     Bodies.rectangle(200, 580, 400, 40, wallOptions),
@@ -64,22 +62,22 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// 스킨 변경 로직: 이미지만 교환
-document.getElementById('skin-btn').addEventListener('click', () => {
+// 스킨 변경 (이미지만 즉시 교체)
+document.getElementById('skin-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
             const level = body.label.split('_')[1];
-            const indexStr = String(level - 1).padStart(2, '0');
-            body.render.sprite.texture = `./asset/${prefix}${indexStr}.png`;
+            body.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
         }
     });
 
     if (currentFruit) {
         const level = currentFruit.label.split('_')[1];
-        currentFruit.render.sprite.texture = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
+        currentFruit.render.sprite.texture = `./asset/${prefix}${String(level-1).padStart(2,'0')}.png`;
     }
 });
 
@@ -101,8 +99,7 @@ const handleMove = (e) => {
         const rect = container.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let x = clientX - rect.left;
-        const level = parseInt(currentFruit.label.split('_')[1]);
-        const radius = FRUITS[level - 1].radius;
+        const radius = FRUITS[parseInt(currentFruit.label.split('_')[1]) - 1].radius;
         x = Math.max(radius + 25, Math.min(375 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
@@ -120,7 +117,7 @@ const handleDrop = (e) => {
 
 container.addEventListener('mousemove', handleMove);
 container.addEventListener('mousedown', handleDrop);
-container.addEventListener('touchstart', (e) => handleMove(e));
+container.addEventListener('touchstart', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', (e) => handleDrop(e));
 
 Events.on(engine, 'collisionStart', (event) => {
