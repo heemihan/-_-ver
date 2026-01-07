@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
             width: GAME_WIDTH,
             height: GAME_HEIGHT,
-            wireframes: true,
+            wireframes: false,
             background: 'transparent' // HTML 배경을 사용하기 위해 투명 설정
         }
     });
