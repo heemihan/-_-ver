@@ -13,17 +13,17 @@ let canDrop = true;
 const mergeQueue = [];
 
 const FRUITS = [
-    { radius: 21, score: 2 },    // 00 
-    { radius: 32, score: 4 },    // 01 
-    { radius: 43, score: 8 },    // 02 
-    { radius: 48, score: 16 },   // 03 
-    { radius: 61, score: 32 },   // 04 
-    { radius: 74, score: 64 },   // 05 
-    { radius: 78, score: 128 },  // 06
-    { radius: 103, score: 256 }, // 07
-    { radius: 123, score: 512 }, // 08 
-    { radius: 123, score: 1024 },// 09
-    { radius: 163, score: 2048 } // 10 
+    { radius: 16, score: 2 },    // 00 
+    { radius: 24, score: 4 },    // 01 
+    { radius: 32, score: 8 },    // 02 
+    { radius: 46, score: 16 },   // 03 
+    { radius: 55, score: 32 },   // 04 
+    { radius: 55, score: 64 },   // 05 
+    { radius: 58, score: 128 },  // 06
+    { radius: 77, score: 256 }, // 07
+    { radius: 92, score: 512 }, // 08 
+    { radius: 92, score: 1024 },// 09
+    { radius: 122, score: 2048 } // 10 
 ];
 
 // 렌더러 설정
