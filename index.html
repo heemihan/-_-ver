@@ -15,6 +15,18 @@
         #ending-layer { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 300; text-align: center; }
         canvas { display: block; position: absolute; top: 0; left: 0; }
     </style>
+    #game-container {
+    /* ...기존 속성들... */
+    touch-action: none; /* 브라우저의 기본 터치 동작(스크롤, 확대)을 완전히 차단 */
+    -webkit-user-select: none; /* 텍스트 선택 방지 */
+    user-select: none;
+}
+
+canvas {
+    /* ...기존 속성들... */
+    touch-action: none;
+    pointer-events: none; /* 클릭 이벤트가 컨테이너로 전달되도록 설정 */
+}
 </head>
 <body>
     <div id="game-container">
