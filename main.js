@@ -222,13 +222,13 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
 });
 
 document.getElementById('back-to-game').onclick = () => {
-    location.reload(); 
+    location.reload();
 };
+
 document.getElementById('reset-btn').onclick = (e) => { 
     e.stopPropagation(); 
     location.reload(); 
 };
-
 document.getElementById('retry-btn').onclick = () => {
     location.reload();
 };
