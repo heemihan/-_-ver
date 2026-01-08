@@ -137,8 +137,18 @@ document.getElementById('back-to-game').onclick = () => location.reload();
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
         const rect = container.getBoundingClientRect();
+        // 모바일 터치와 마우스 클릭 위치를 정확히 계산
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let x = clientX - rect.left;
+        
+        // 컨테이너 대비 실제 X 좌표 계산
+        let x = (clientX - rect.left) * (400 / rect.width);
+        
         const level = parseInt(currentFruit.label.split('_')[1]);
         const radius = FRUITS[level - 1].radius;
-        x = Math.max(radius + 60
+        
+        // 과일이 벽(30px) 밖으로 나가지 않게 제한
+        x = Math.max(radius + 30, Math.min(370 - radius, x));
+        
+        Body.setPosition(currentFruit, { x: x, y: 80 });
+    }
+};
