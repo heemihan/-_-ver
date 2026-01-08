@@ -196,7 +196,30 @@ function startEndingSequence() {
         }, 3000);
     }, 1200);
 }
-document.getElementById('skin-btn').onclick = () => { /* 기존 내용 */ };
+document.getElementById('skin-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+    const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
+    
+    const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
+    if (currentFruit) allFruits.push(currentFruit);
+
+    allFruits.forEach(body => {
+        const level = parseInt(body.label.split('_')[1]);
+        const indexStr = String(level - 1).padStart(2, '0');
+        const texturePath = `asset/${prefix}${indexStr}.png`;
+        
+        const img = new Image();
+        img.src = texturePath;
+        img.onload = function() {
+            body.render.sprite.texture = texturePath;
+            const fruitData = FRUITS[level - 1];
+            const scale = (fruitData.radius * 2) / img.width;
+            body.render.sprite.xScale = scale * 1.05;
+            body.render.sprite.yScale = scale * 1.05;
+        };
+    });
+});
 
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
