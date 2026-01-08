@@ -177,46 +177,53 @@ Events.on(engine, 'collisionStart', (event) => {
 
 // [중요] 통합 업데이트 루프 및 게임오버 체크
 Events.on(engine, 'afterUpdate', () => {
-    // 1. 머지 처리 (생략 없이 기존 로직 유지)
+    // 1. 머지 처리 (기존 로직 유지)
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
         if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
             Composite.remove(world, [bodyA, bodyB]);
             const nextLevel = level + 1;
             const nextFruit = createFruit(x, y, nextLevel);
+            // 중요: 새로 합성된 과일에도 충분한 유예 시간을 부여
+            nextFruit.spawnTime = Date.now(); 
             Composite.add(world, nextFruit);
+            
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
             if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
 
-    // 2. 게임 오버 체크 (간섭 해결 핵심 부분)
+    // 2. 게임 오버 체크 (강화된 로직)
     if (!isGameOver) {
-    const fruits = Composite.allBodies(world).filter(b => 
-        b.label && 
-        b.label.startsWith('fruit_') && 
-        !b.isStatic && 
-        b !== currentFruit
-    );
+        const fruits = Composite.allBodies(world).filter(b => 
+            b.label && 
+            b.label.startsWith('fruit_') && 
+            !b.isStatic && 
+            b !== currentFruit
+        );
 
-    for (let fruit of fruits) {
-        const age = Date.now() - (fruit.spawnTime || 0);
+        for (let fruit of fruits) {
+            // 태어난 지 얼마 안 된 과일은 무조건 패스 (최소 3.5초 대기)
+            const age = Date.now() - (fruit.spawnTime || 0);
+            if (age < 3500) continue; 
 
-        // 수정 포인트 1: 유예 기간을 3초(3000ms)로 늘림
-        // 수정 포인트 2: 데드라인을 120에서 90으로 높임 (더 위쪽으로)
-        // 수정 포인트 3: 속도 조건을 더 세밀하게 조정
-        if (age > 3000 && fruit.position.y < 90) { 
-            // 미세하게 떨리는 것을 방지하기 위해 속도 절대값을 체크
-            if (Math.abs(fruit.velocity.y) < 0.2) {
-                isGameOver = true;
-                document.getElementById('final-score').innerText = score;
-                document.getElementById('game-over').style.display = 'block';
-                break;
+            // 데드라인에 걸쳐 있는지 확인
+            if (fruit.position.y < 100) { 
+                // 위로 튀어오르는 중이 아니고, 충분히 안정된 상태인지 확인
+                // 속도의 절대값이 아주 작을 때만 (완전히 멈춰서 쌓였을 때만) 종료
+                const isStable = Math.abs(fruit.velocity.y) < 0.1 && Math.abs(fruit.velocity.x) < 0.1;
+                
+                if (isStable) {
+                    isGameOver = true;
+                    document.getElementById('final-score').innerText = score;
+                    document.getElementById('game-over').style.display = 'block';
+                    break;
+                }
             }
         }
     }
-}
+});
 
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
