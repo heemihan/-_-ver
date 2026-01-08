@@ -166,7 +166,36 @@ Events.on(engine, 'afterUpdate', () => {
 });
 
 // 엔딩 및 버튼 로직 생략 (기존 코드 유지)
-function startEndingSequence() { /* 기존 내용 */ }
+function startEndingSequence() {
+    if (isGameOver) return;
+    isGameOver = true;
+    
+    // 배경 갈라지는 효과
+    document.getElementById('bg-left').classList.add('split-left');
+    document.getElementById('bg-right').classList.add('split-right');
+    
+    setTimeout(() => {
+        const endingLayer = document.getElementById('ending-layer');
+        const gifContainer = document.getElementById('ending-gif-container');
+        const imgContainer = document.getElementById('ending-img-container');
+        const backBtn = document.getElementById('back-to-game');
+        
+        endingLayer.style.display = 'block';
+        
+        // 3초 후 GIF 숨기고 최종 이미지 표시
+        setTimeout(() => {
+            gifContainer.style.display = 'none';
+            imgContainer.style.display = 'flex';
+            setTimeout(() => { imgContainer.style.opacity = '1'; }, 100);
+            
+            // 다시 시작 버튼 표시
+            setTimeout(() => {
+                backBtn.style.display = 'block';
+                setTimeout(() => { backBtn.style.opacity = '1'; }, 100);
+            }, 3000);
+        }, 3000);
+    }, 1200);
+}
 document.getElementById('skin-btn').onclick = () => { /* 기존 내용 */ };
 
 Render.run(render);
