@@ -62,20 +62,15 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// 테스트용: 과일을 생성하지 않고 바로 엔딩 실행
-    startEndingSequence(); 
-    return;
-
-// 엔딩 시퀀스 함수
+// 엔딩 시퀀스 함수 (독립적으로 선언)
 function startEndingSequence() {
+    if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
     isGameOver = true;
-    
-    // 1. 배경 갈라짐 애니메이션 시작
+
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
 
     setTimeout(() => {
-        // 2. 엔딩 레이어(GIF) 등장
         const endingLayer = document.getElementById('ending-layer');
         const gifContainer = document.getElementById('ending-gif-container');
         const imgContainer = document.getElementById('ending-img-container');
@@ -83,50 +78,40 @@ function startEndingSequence() {
 
         endingLayer.style.display = 'block';
 
-        // 3. 3초 후 GIF 숨기고 JPG 서서히 나타내기
         setTimeout(() => {
             gifContainer.style.display = 'none';
-            imgContainer.style.display = 'block';
+            imgContainer.style.display = 'flex'; 
             
-            // 브라우저가 display:block을 인식한 후 opacity를 변경해야 transition이 먹힙니다.
-            setTimeout(() => {
-                imgContainer.style.opacity = '1';
-            }, 50);
+            setTimeout(() => { imgContainer.style.opacity = '1'; }, 50);
 
-            // 4. JPG가 나타나기 시작한 지 3초 후에 돌아가기 버튼 표시
             setTimeout(() => {
                 backBtn.style.display = 'block';
-                setTimeout(() => {
-                    backBtn.style.opacity = '1';
-                }, 50);
+                setTimeout(() => { backBtn.style.opacity = '1'; }, 50);
             }, 3000);
 
-        }, 3000); // GIF 노출 시간
-    }, 1200); // 배경 갈라지는 속도에 맞춤
+        }, 3000);
+    }, 1200);
 }
 
-// 스킨 버튼 리스너
+// 스킨 버튼 리스너 (괄호 오류 수정됨)
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
-   // 월드 내 모든 과일과 대기 중인 과일 수집
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     if (currentFruit) allFruits.push(currentFruit);
 
-    // 각 과일의 텍스처 업데이트
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
         const fruitData = FRUITS[level - 1];
 
-        body.render.sprite.texture = texturePath; // 텍스처 변경
-
+        body.render.sprite.texture = texturePath;
         const img = new Image();
         img.src = texturePath;
-        img.onload = () => { // 화살표 함수를 사용하여 간결하게 처리
+        img.onload = function() {
             const scale = (fruitData.radius * 2) / img.width;
             body.render.sprite.xScale = scale * 1.05;
             body.render.sprite.yScale = scale * 1.05;
