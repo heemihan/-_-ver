@@ -58,8 +58,31 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85); color: white; padding: 40px;
             text-align: center; border-radius: 20px; display: none; z-index: 600;
-        }
+        
+        #ending-img-container {
+        display: none; 
+        width: 100%; 
+        height: 100%; 
+        position: relative;
+        opacity: 0;
+        transition: opacity 2s ease-in-out; /* 2초 동안 페이드 인 */
+    }
 
+    /* 돌아가기 버튼: 배경 없이 아이콘만 표시 */
+    #back-to-game {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: none;
+        border: none;
+        font-size: 50px;
+        cursor: pointer;
+        opacity: 0;
+        display: none;
+        transition: opacity 1s;
+        z-index: 800;
+    }
         /* 엔딩 레이어 스타일 통합 */
         #ending-layer { 
             display: none; position: absolute; top: 0; left: 0; 
@@ -109,14 +132,13 @@
             <button id="retry-btn" style="padding:10px 20px; cursor:pointer;">다시 도전</button>
         </div>
         <div id="ending-layer">
-            <div id="ending-gif-container">
-                <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
-            </div>
-            <div id="ending-img-container">
-                <img src="asset/ending.jpg">
-                <button id="back-to-game">↩️</button>
-            </div>
-        </div>
+    <div id="ending-gif-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+        <img src="asset/thank.gif" style="width: 100%; height: auto;">
+    </div>
+    <div id="ending-img-container">
+        <img src="asset/ending.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+        <button id="back-to-game">↩️</button>
+    </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="main.js"></script>
