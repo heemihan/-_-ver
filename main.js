@@ -43,7 +43,7 @@ function createFruit(x, y, level, isStatic = false) {
     const fruit = Bodies.circle(x, y, fruitData.radius, {
         label: 'fruit_' + level,
         isStatic: isStatic,
-        restitution: 0.3,
+        restitution: 0.2, // [조정] 반발력을 낮춰 튀어오름 방지
         friction: 0.1,
         render: { sprite: { texture: texturePath, xScale: 1, yScale: 1 } }
     });
@@ -135,96 +135,4 @@ const handleMove = (e) => {
         let x = clientX - rect.left;
         const level = parseInt(currentFruit.label.split('_')[1]);
         const radius = FRUITS[level - 1].radius;
-        x = Math.max(radius + 60, Math.min(340 - radius, x));
-        Body.setPosition(currentFruit, { x: x, y: 80 });
-    }
-};
-
-const handleDrop = (e) => {
-    if (e.target.closest('.top-btn-group')) return;
-    if (currentFruit && canDrop && !isGameOver) {
-        canDrop = false;
-        Body.setStatic(currentFruit, false);
-        currentFruit = null;
-        setTimeout(spawnFruit, 1000);
-    }
-};
-
-container.addEventListener('mousemove', handleMove);
-container.addEventListener('mousedown', handleDrop);
-container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
-container.addEventListener('touchend', handleDrop);
-
-// [중요] 충돌 감지 로직 복구
-Events.on(engine, 'collisionStart', (event) => {
-    event.pairs.forEach((pair) => {
-        const { bodyA, bodyB } = pair;
-        if (bodyA.label === bodyB.label && bodyA.label.startsWith('fruit_')) {
-            if (bodyA.isMerging || bodyB.isMerging) return;
-            const level = parseInt(bodyA.label.split('_')[1]);
-            if (level < 11) {
-                bodyA.isMerging = true;
-                bodyB.isMerging = true;
-                mergeQueue.push({
-                    bodyA, bodyB, level,
-                    x: (bodyA.position.x + bodyB.position.x) / 2,
-                    y: (bodyA.position.y + bodyB.position.y) / 2
-                });
-            }
-        }
-    });
-});
-
-// [중요] 통합 업데이트 루프 및 게임오버 체크
-Events.on(engine, 'afterUpdate', () => {
-    // 1. 머지 처리 (기존 로직 유지)
-    while (mergeQueue.length > 0) {
-        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
-        if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
-            Composite.remove(world, [bodyA, bodyB]);
-            const nextLevel = level + 1;
-            const nextFruit = createFruit(x, y, nextLevel);
-            // 중요: 새로 합성된 과일에도 충분한 유예 시간을 부여
-            nextFruit.spawnTime = Date.now(); 
-            Composite.add(world, nextFruit);
-            
-            score += FRUITS[level - 1].score;
-            document.getElementById('score').innerText = score;
-            if (nextLevel === 11) setTimeout(startEndingSequence, 500);
-        }
-    }
-
-    // 2. 게임 오버 체크 (강화된 로직)
-    if (!isGameOver) {
-        const fruits = Composite.allBodies(world).filter(b => 
-            b.label && 
-            b.label.startsWith('fruit_') && 
-            !b.isStatic && 
-            b !== currentFruit
-        );
-
-        for (let fruit of fruits) {
-            // 태어난 지 얼마 안 된 과일은 무조건 패스 (최소 3.5초 대기)
-            const age = Date.now() - (fruit.spawnTime || 0);
-            if (age < 3500) continue; 
-
-            // 데드라인에 걸쳐 있는지 확인
-            if (fruit.position.y < 100) { 
-                // 위로 튀어오르는 중이 아니고, 충분히 안정된 상태인지 확인
-                // 속도의 절대값이 아주 작을 때만 (완전히 멈춰서 쌓였을 때만) 종료
-                const isStable = Math.abs(fruit.velocity.y) < 0.1 && Math.abs(fruit.velocity.x) < 0.1;
-                
-                if (isStable) {
-                    isGameOver = true;
-                    document.getElementById('final-score').innerText = score;
-                    document.getElementById('game-over').style.display = 'block';
-                    break;
-                }
-            }
-        }
-    }
-});
-
-Render.run(render);
-Runner.run(Runner.create({ isFixed: true }), engine);
-spawnFruit();
+        x = Math.max(radius + 60
