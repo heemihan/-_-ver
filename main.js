@@ -29,8 +29,8 @@ const render = Render.create({
 const wallOptions = { isStatic: true, friction: 0, render: { visible: false } };
 Composite.add(world, [
     Bodies.rectangle(200, 580, 400, 40, wallOptions), // 바닥
-    Bodies.rectangle(40, 300, 20, 600, wallOptions),  // 왼쪽 벽
-    Bodies.rectangle(360, 300, 20, 600, wallOptions) // 오른쪽 벽
+    Bodies.rectangle(30, 300, 20, 600, wallOptions),  // 왼쪽 벽
+    Bodies.rectangle(370, 300, 20, 600, wallOptions) // 오른쪽 벽
 ]);
 
 // 과일 생성 함수
