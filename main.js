@@ -13,10 +13,10 @@ let canDrop = true;
 const mergeQueue = [];
 
 const FRUITS = [
-    { radius: 17.5, score: 2 }, { radius: 27.5, score: 4 }, { radius: 42.5, score: 8 },
-    { radius: 52.5, score: 16 }, { radius: 67.5, score: 32 }, { radius: 82.5, score: 64 },
-    { radius: 97.5, score: 128 }, { radius: 117.5, score: 256 }, { radius: 137.5, score: 512 },
-    { radius: 157.5, score: 1024 }, { radius: 187.5, score: 2048 }
+    { radius: 17.5, score: 2 }, { radius: 25, score: 4 }, { radius: 34, score: 8 },
+    { radius: 42, score: 16 }, { radius: 54, score: 32 }, { radius: 66, score: 64 },
+    { radius: 78, score: 128 }, { radius: 94, score: 256 }, { radius: 110, score: 512 },
+    { radius: 126, score: 1024 }, { radius: 150, score: 2048 }
 ];
 
 const render = Render.create({
