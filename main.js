@@ -4,6 +4,7 @@ const engine = Engine.create();
 const world = engine.world;
 const container = document.getElementById('game-container');
 
+// 상태 변수
 let currentSkinType = 'A';
 let score = 0;
 let isGameOver = false;
@@ -24,14 +25,15 @@ const render = Render.create({
     options: { width: 400, height: 600, wireframes: false, background: 'transparent' }
 });
 
-// 벽 좁히기 적용 (좌측 50, 우측 350)
+// 벽 설정
 const wallOptions = { isStatic: true, friction: 0, render: { visible: false } };
 Composite.add(world, [
-    Bodies.rectangle(200, 580, 400, 40, wallOptions),
-    Bodies.rectangle(50, 300, 20, 600, wallOptions), 
-    Bodies.rectangle(350, 300, 20, 600, wallOptions)
+    Bodies.rectangle(200, 580, 400, 40, wallOptions), // 바닥
+    Bodies.rectangle(50, 300, 20, 600, wallOptions),  // 왼쪽 벽
+    Bodies.rectangle(350, 300, 20, 600, wallOptions) // 오른쪽 벽
 ]);
 
+// 과일 생성 함수
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
     const indexStr = String(level - 1).padStart(2, '0');
@@ -49,6 +51,7 @@ function createFruit(x, y, level, isStatic = false) {
     fruit.spawnTime = Date.now();
     fruit.isMerging = false;
 
+    // 이미지 로드 후 스케일 조정
     const img = new Image();
     img.src = texturePath;
     img.onload = function() {
@@ -59,6 +62,7 @@ function createFruit(x, y, level, isStatic = false) {
     return fruit;
 }
 
+// 새로운 과일 대기
 function spawnFruit() {
     if (isGameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
@@ -67,16 +71,19 @@ function spawnFruit() {
     canDrop = true;
 }
 
+// 엔딩 시퀀스
 function startEndingSequence() {
     if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
     isGameOver = true;
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
+    
     setTimeout(() => {
         const endingLayer = document.getElementById('ending-layer');
         const gifContainer = document.getElementById('ending-gif-container');
         const imgContainer = document.getElementById('ending-img-container');
         const backBtn = document.getElementById('back-to-game');
+        
         endingLayer.style.display = 'block';
         setTimeout(() => {
             gifContainer.style.display = 'none';
@@ -90,42 +97,50 @@ function startEndingSequence() {
     }, 1200);
 }
 
-// 스킨 변경 로직
+// 통합 스킨 변경 로직
 document.getElementById('skin-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-   currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+    e.stopPropagation(); // 과일 투하 방지
+    
+    // 모드 전환
+    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
+    
+    // 화면상의 모든 과일(월드 내 과일 + 현재 잡고 있는 과일)
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     if (currentFruit) allFruits.push(currentFruit);
+
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
+        
         const img = new Image();
         img.src = texturePath;
         img.onload = function() {
             body.render.sprite.texture = texturePath;
             const fruitData = FRUITS[level - 1];
-            const scale = (FRUITS[level - 1].radius * 2) / img.width;
+            const scale = (fruitData.radius * 2) / img.width;
             body.render.sprite.xScale = scale * 1.05;
             body.render.sprite.yScale = scale * 1.05;
         };
     });
-    console.log("Skin changed to:", currentSkinType);
 });
 
+// 버튼 이벤트
 document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
+// 마우스/터치 이동 및 낙하
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
         const rect = container.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let x = clientX - rect.left;
+        
         const level = parseInt(currentFruit.label.split('_')[1]);
         const radius = FRUITS[level - 1].radius;
-        // 좁아진 벽 범위 적용 (60~340)
+        // 좁아진 벽 범위 안으로 제한
         x = Math.max(radius + 60, Math.min(340 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
@@ -146,6 +161,7 @@ container.addEventListener('mousedown', handleDrop);
 container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', handleDrop);
 
+// 충돌 감지 (머지)
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
@@ -154,24 +170,34 @@ Events.on(engine, 'collisionStart', (event) => {
             const level = parseInt(bodyA.label.split('_')[1]);
             if (level < 11) {
                 bodyA.isMerging = true; bodyB.isMerging = true;
-                mergeQueue.push({ bodyA, bodyB, level, x: (bodyA.position.x + bodyB.position.x) / 2, y: (bodyA.position.y + bodyB.position.y) / 2 });
+                mergeQueue.push({ 
+                    bodyA, bodyB, level, 
+                    x: (bodyA.position.x + bodyB.position.x) / 2, 
+                    y: (bodyA.position.y + bodyB.position.y) / 2 
+                });
             }
         }
     });
 });
 
+// 업데이트 루프
 Events.on(engine, 'afterUpdate', () => {
+    // 머지 처리
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
         if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
             Composite.remove(world, [bodyA, bodyB]);
-            Composite.add(world, createFruit(x, y, level + 1));
+            const nextFruit = createFruit(x, y, level + 1);
+            Composite.add(world, nextFruit);
+            
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
+            
             if (level + 1 === 11) setTimeout(startEndingSequence, 500);
         }
     }
 
+    // 게임 오버 체크
     if (!isGameOver) {
         const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
         for (let fruit of fruits) {
@@ -186,41 +212,6 @@ Events.on(engine, 'afterUpdate', () => {
         }
     }
 });
-
-const skinBtn = document.getElementById('skin-btn');
-
-if (skinBtn) {
-    skinBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // 클릭 시 과일이 떨어지는 것 방지
-
-        // 1. 상태 전환 (A <-> B)
-        currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
-        const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
-        
-        console.log("현재 스킨 모드:", currentSkinType);
-
-        // 2. 화면의 모든 과일 수집
-        const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
-        if (currentFruit) allFruits.push(currentFruit);
-
-        // 3. 이미지 교체
-        allFruits.forEach(body => {
-            const level = parseInt(body.label.split('_')[1]);
-            const indexStr = String(level - 1).padStart(2, '0');
-            const texturePath = `./asset/${prefix}${indexStr}.png`;
-
-            const img = new Image();
-            img.src = texturePath;
-            img.onload = function() {
-                body.render.sprite.texture = texturePath;
-                const fruitData = FRUITS[level - 1];
-                const scale = (fruitData.radius * 2) / img.width;
-                body.render.sprite.xScale = scale * 1.05;
-                body.render.sprite.yScale = scale * 1.05;
-            };
-        });
-    });
-}
 
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
