@@ -5,7 +5,7 @@ const world = engine.world;
 const container = document.getElementById('game-container');
 
 // 상태 변수
-let currentSkinType = 'A';
+let currentSkinType = 'A'; // 기본값은 'A' (fruitXX.png)
 let score = 0;
 let isGameOver = false;
 let currentFruit = null;
@@ -32,6 +32,7 @@ Composite.add(world, [
     Bodies.rectangle(390, 300, 20, 600, wallOptions)
 ]);
 
+// 과일 생성 함수: 현재 currentSkinType에 맞춰 텍스처 경로 설정
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
     const indexStr = String(level - 1).padStart(2, '0');
@@ -62,35 +63,38 @@ function spawnFruit() {
     startEndingSequence(); 
     return;
     
+    if (isGameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
     currentFruit = createFruit(200, 80, level, true);
     Composite.add(world, currentFruit);
     canDrop = true;
 }
 
-// 스킨 변경 로직: 실시간 모든 오브젝트 및 대기 과일 텍스처 교체
+// --- 스킨 변경 로직 시작 ---
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
+    
+    // A <-> B 타입 전환
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
-    // 1. 월드에 있는 모든 과일 리스트 확보
+    // 1. 월드 내의 모든 과일 몸체 확보
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     
-    // 2. 현재 조작 중인(대기 중인) 과일도 리스트에 추가
-    if (currentFruit) {
-        allFruits.push(currentFruit);
-    }
+    // 2. 현재 조작 중인(공중에 떠 있는) 과일도 리스트에 추가
+    if (currentFruit) allFruits.push(currentFruit);
 
-    // 3. 모든 과일의 이미지와 스케일 업데이트
+    // 3. 모든 과일의 이미지 경로와 스케일 실시간 업데이트
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
         const fruitData = FRUITS[level - 1];
 
+        // 텍스처 교체
         body.render.sprite.texture = texturePath;
 
+        // 새 이미지 로드 후 스케일 재설정 (이미지가 사라지는 현상 방지)
         const img = new Image();
         img.src = texturePath;
         img.onload = function() {
@@ -100,7 +104,9 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
         };
     });
 });
+// --- 스킨 변경 로직 끝 ---
 
+// 엔딩 및 버튼 리스너
 function startEndingSequence() {
     isGameOver = true;
     document.getElementById('ending-layer').style.display = 'block';
@@ -114,6 +120,7 @@ document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); loc
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
+// 마우스 및 터치 제어
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
         const rect = container.getBoundingClientRect();
@@ -141,6 +148,7 @@ container.addEventListener('mousedown', handleDrop);
 container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', handleDrop);
 
+// 충돌 감지 및 합성
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
@@ -155,6 +163,7 @@ Events.on(engine, 'collisionStart', (event) => {
     });
 });
 
+// 업데이트 루프
 Events.on(engine, 'afterUpdate', () => {
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
@@ -167,6 +176,7 @@ Events.on(engine, 'afterUpdate', () => {
             if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
+    // 게임 오버 체크
     if (!isGameOver && !canDrop) {
         const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
         for (let fruit of fruits) {
