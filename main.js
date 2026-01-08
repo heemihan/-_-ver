@@ -27,8 +27,8 @@ const render = Render.create({
 const wallOptions = { isStatic: true, friction: 0, render: { visible: false } };
 Composite.add(world, [
     Bodies.rectangle(200, 580, 400, 40, wallOptions),
-    Bodies.rectangle(10, 300, 20, 600, wallOptions),
-    Bodies.rectangle(390, 300, 20, 600, wallOptions)
+    Bodies.rectangle(20, 300, 20, 600, wallOptions),
+    Bodies.rectangle(380, 300, 20, 600, wallOptions)
 ]);
 
 function createFruit(x, y, level, isStatic = false) {
