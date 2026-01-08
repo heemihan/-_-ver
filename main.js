@@ -68,7 +68,29 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
-    
+
+    const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
+
+    if (currentFruit) allFruits.push(currentFruit);
+
+    allFruits.forEach(body => {
+        const level = parseInt(body.label.split('_')[1]);
+        const indexStr = String(level - 1).padStart(2, '0');
+        const texturePath = `./asset/${prefix}${indexStr}.png`;
+        const fruitData = FRUITS[level - 1];
+
+        body.render.sprite.texture = texturePath;
+
+        const img = new Image();
+        img.src = texturePath;
+        img.onload = function() {
+            const scale = (fruitData.radius * 2) / img.width;
+            body.render.sprite.xScale = scale * 1.05;
+            body.render.sprite.yScale = scale * 1.05;
+        };
+    });
+});
+
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
             const level = parseInt(body.label.split('_')[1]);
