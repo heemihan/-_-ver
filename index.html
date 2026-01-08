@@ -85,19 +85,18 @@
         /* 돌아가기 버튼 (아이콘) */
        #back-to-game {
     position: absolute;
-    top: 20px;            /* 위에서 20px 내림 */
-    left: 20px;           /* 왼쪽에서 20px 띄움 */
-    background: rgba(0, 0, 0, 0.2); /* 배경에서 잘 보이도록 살짝 어둡게 (선택 사항) */
-    border: none;
-    border-radius: 50%;
-    font-size: 48px;      /* 기존 60px의 0.8배인 48px로 조절 */
+    top: 20px;            /* 위에서 20px */
+    left: 20px;           /* 왼쪽에서 20px */
+    background: none;     /* 배경 원형 제거 */
+    border: none;         /* 테두리 제거 */
+    font-size: 30px;      /* 사이즈 30px로 고정 */
     cursor: pointer;
-    opacity: 0;           /* 초기 상태 투명 */
-    display: none;        /* 초기 상태 숨김 */
+    opacity: 0;           /* 초기 투명 */
+    display: none;        /* 초기 숨김 */
     transition: opacity 1s;
-    z-index: 999;         /* 최상단 배치 */
+    z-index: 999;         /* 최상단 */
     line-height: 1;
-    padding: 5px;         /* 클릭 영역 확보 */
+    padding: 0;           /* 여백 제거 */
 }
     </style>
 </head>
