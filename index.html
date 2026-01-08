@@ -26,6 +26,44 @@
             overflow: hidden;
             touch-action: none;
         }
+   /* 배경 이미지가 반으로 갈라지는 효과를 위한 레이어 */
+        #background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* 캔버스보다 뒤에 위치 */
+            pointer-events: none;
+        }
+
+        .bg-part {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background-image: url('asset/background.png');
+            background-size: 400px 600px; /* 전체 컨테이너 크기에 맞춤 */
+            transition: transform 1s ease-in-out; /* 부드러운 이동 애니메이션 */
+        }
+
+        #bg-left {
+            left: 0;
+            background-position: left top;
+        }
+
+        #bg-right {
+            right: 0;
+            background-position: right top;
+        }
+
+        /* 승리 시 적용될 애니메이션 클래스 */
+        .split-left {
+            transform: translateX(-100%);
+        }
+        .split-right {
+            transform: translateX(100%);
+        }
 
         /* 캔버스 화면 중앙 정렬 강제 (오른쪽 밀림 해결) */
         canvas {
