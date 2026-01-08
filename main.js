@@ -51,7 +51,6 @@ function createFruit(x, y, level, isStatic = false) {
     fruit.spawnTime = Date.now();
     fruit.isMerging = false;
 
-    // 이미지 로드 후 스케일 조정
     const img = new Image();
     img.src = texturePath;
     img.onload = function() {
@@ -73,7 +72,7 @@ function spawnFruit() {
 
 // 엔딩 시퀀스
 function startEndingSequence() {
-    if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
+    if (isGameOver) return;
     isGameOver = true;
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
@@ -97,15 +96,12 @@ function startEndingSequence() {
     }, 1200);
 }
 
-// 통합 스킨 변경 로직
+// 스킨 변경 로직
 document.getElementById('skin-btn').addEventListener('click', (e) => {
-    e.stopPropagation(); // 과일 투하 방지
-    
-    // 모드 전환
+    e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
-    // 화면상의 모든 과일(월드 내 과일 + 현재 잡고 있는 과일)
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     if (currentFruit) allFruits.push(currentFruit);
 
@@ -131,16 +127,14 @@ document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); loc
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
-// 마우스/터치 이동 및 낙하
+// 이동 및 낙하
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
         const rect = container.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let x = clientX - rect.left;
-        
         const level = parseInt(currentFruit.label.split('_')[1]);
         const radius = FRUITS[level - 1].radius;
-        // 좁아진 벽 범위 안으로 제한
         x = Math.max(radius + 60, Math.min(340 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
@@ -161,62 +155,59 @@ container.addEventListener('mousedown', handleDrop);
 container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', handleDrop);
 
-// 충돌 감지 (머지)
+// [중요] 충돌 감지 로직 복구
+Events.on(engine, 'collisionStart', (event) => {
+    event.pairs.forEach((pair) => {
+        const { bodyA, bodyB } = pair;
+        if (bodyA.label === bodyB.label && bodyA.label.startsWith('fruit_')) {
+            if (bodyA.isMerging || bodyB.isMerging) return;
+            const level = parseInt(bodyA.label.split('_')[1]);
+            if (level < 11) {
+                bodyA.isMerging = true;
+                bodyB.isMerging = true;
+                mergeQueue.push({
+                    bodyA, bodyB, level,
+                    x: (bodyA.position.x + bodyB.position.x) / 2,
+                    y: (bodyA.position.y + bodyB.position.y) / 2
+                });
+            }
+        }
+    });
+});
+
+// [중요] 통합 업데이트 루프 및 게임오버 체크
 Events.on(engine, 'afterUpdate', () => {
     // 1. 머지 처리
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
         if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
             Composite.remove(world, [bodyA, bodyB]);
-            
-            const nextLevel = level + 1; // nextLevel 정의
+            const nextLevel = level + 1;
             const nextFruit = createFruit(x, y, nextLevel);
             Composite.add(world, nextFruit);
             
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
             
-            // 수박 달성 시 엔딩
-            if (nextLevel === 11) {
-                setTimeout(startEndingSequence, 500);
-            }
+            if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
 
-// 업데이트 루프
-Events.on(engine, 'afterUpdate', () => {
-    // 머지 처리
-    while (mergeQueue.length > 0) {
-        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
-        if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
-            Composite.remove(world, [bodyA, bodyB]);
-            const nextFruit = createFruit(x, y, level + 1);
-            Composite.add(world, nextFruit);
-            
-            score += FRUITS[level - 1].score;
-            document.getElementById('score').innerText = score;
-            
-         if (nextLevel === 11) {
-                setTimeout(startEndingSequence, 500);
-            }
-        }
-
-    // 게임 오버 체크
+    // 2. 게임 오버 체크
     if (!isGameOver) {
-       const fruits = Composite.allBodies(world).filter(b => 
-        b.label && 
-        b.label.startsWith('fruit_') && 
-        !b.isStatic &&
-        b !== currentFruit
-    );
+        const fruits = Composite.allBodies(world).filter(b => 
+            b.label && b.label.startsWith('fruit_') && !b.isStatic && b !== currentFruit
+        );
+        
         for (let fruit of fruits) {
-            if (fruit.position.y < 120 && fruit.velocity.y > -0.5) {
-                if (age > 2000 && fruit.position.y < 120 && fruit.velocity.y > -0.5) {
-            isGameOver = true;
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('game-over').style.display = 'block';
-            break;
-           }
+            const age = Date.now() - (fruit.spawnTime || 0);
+            // 2초 이상 된 과일이 데드라인(120)을 넘었을 때
+            if (age > 2000 && fruit.position.y < 120 && fruit.velocity.y > -0.5) {
+                isGameOver = true;
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('game-over').style.display = 'block';
+                break;
+            }
         }
     }
 });
