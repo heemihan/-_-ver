@@ -69,11 +69,11 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
 
-    const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
-
+    const allBodies = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
+    if (currentFruit) allBodies.push(currentFruit);
     if (currentFruit) allFruits.push(currentFruit);
 
-    allFruits.forEach(body => {
+   allBodies.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
@@ -91,6 +91,9 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
     });
 });
 
+img.onerror = () => {
+            console.error("이미지를 찾을 수 없습니다:", texturePath);
+    
     Composite.allBodies(world).forEach(body => {
         if (body.label && body.label.startsWith('fruit_')) {
             const level = parseInt(body.label.split('_')[1]);
