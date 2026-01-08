@@ -57,6 +57,11 @@ function createFruit(x, y, level, isStatic = false) {
 
 function spawnFruit() {
     if (isGameOver) return;
+    
+    // 테스트용: 과일을 생성하지 않고 바로 엔딩 실행
+    startEndingSequence(); 
+    return;
+    
     const level = Math.floor(Math.random() * 3) + 1;
     currentFruit = createFruit(200, 80, level, true);
     Composite.add(world, currentFruit);
