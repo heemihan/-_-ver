@@ -177,7 +177,7 @@ Events.on(engine, 'collisionStart', (event) => {
 
 // [중요] 통합 업데이트 루프 및 게임오버 체크
 Events.on(engine, 'afterUpdate', () => {
-    // 1. 머지 처리
+    // 1. 머지 처리 (생략 없이 기존 로직 유지)
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
         if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
@@ -185,23 +185,27 @@ Events.on(engine, 'afterUpdate', () => {
             const nextLevel = level + 1;
             const nextFruit = createFruit(x, y, nextLevel);
             Composite.add(world, nextFruit);
-            
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
-            
             if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
 
-    // 2. 게임 오버 체크
+    // 2. 게임 오버 체크 (간섭 해결 핵심 부분)
     if (!isGameOver) {
+        // 월드 내의 모든 바디 중 '과일'이면서 '고정(Static)되지 않은' 것들만 필터링
         const fruits = Composite.allBodies(world).filter(b => 
-            b.label && b.label.startsWith('fruit_') && !b.isStatic && b !== currentFruit
+            b.label && 
+            b.label.startsWith('fruit_') && 
+            !b.isStatic && // [핵심] 대기 중인(isStatic: true) 과일은 제외됨
+            b !== currentFruit // [핵심] 현재 마우스로 잡고 있는 과일은 제외됨
         );
-        
+
         for (let fruit of fruits) {
+            // 과일 생성 후 최소 2초가 지나야 체크 시작
             const age = Date.now() - (fruit.spawnTime || 0);
-            // 2초 이상 된 과일이 데드라인(120)을 넘었을 때
+
+            // 2000ms(2초) 유예 기간 부여 및 데드라인 체크
             if (age > 2000 && fruit.position.y < 120 && fruit.velocity.y > -0.5) {
                 isGameOver = true;
                 document.getElementById('final-score').innerText = score;
