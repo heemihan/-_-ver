@@ -185,17 +185,22 @@ Events.on(engine, 'afterUpdate', () => {
             if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
-    if (!isGameOver && !canDrop) {
-        const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
-        for (let fruit of fruits) {
-            if (fruit.position.y < 120 && Math.abs(fruit.velocity.y) < 0.1) {
+    if (!isGameOver) {
+    const fruits = Composite.allBodies(world).filter(b => 
+        b.label && b.label.startsWith('fruit_') && !b.isStatic
+    );
+
+    for (let fruit of fruits) {
+        if (fruit.position.y < 120 && fruit.velocity.y > -0.1 && Math.abs(fruit.velocity.y) < 0.2) {
+            if (!fruit.spawnTime || Date.now() - fruit.spawnTime > 1000) {
                 isGameOver = true;
                 document.getElementById('game-over').style.display = 'block';
                 document.getElementById('final-score').innerText = score;
+                break;
             }
         }
     }
-});
+}
 
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
