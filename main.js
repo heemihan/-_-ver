@@ -62,6 +62,10 @@ function spawnFruit() {
     canDrop = true;
 }
 
+// 테스트용: 과일을 생성하지 않고 바로 엔딩 실행
+    startEndingSequence(); 
+    return;
+
 // 엔딩 시퀀스 함수
 function startEndingSequence() {
     if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
