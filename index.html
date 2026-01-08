@@ -59,16 +59,26 @@
             background: rgba(0, 0, 0, 0.85); color: white; padding: 40px;
             text-align: center; border-radius: 20px; display: none; z-index: 600;
         
-        #ending-img-container {
-        display: none; 
-        width: 100%; 
-        height: 100%; 
+       /* JPG 컨테이너: JS에서 display를 flex로 바꿀 때 투명도 애니메이션이 먹히도록 설정 */
+    #ending-img-container {
+        display: none; /* 초기 상태 숨김 */
+        width: 100%;
+        height: 100%;
         position: relative;
         opacity: 0;
-        transition: opacity 2s ease-in-out; /* 2초 동안 페이드 인 */
+        transition: opacity 2s ease-in-out; /* 2초간 페이드 인 */
+        background: #fff; /* 혹시 모를 빈 화면 방지용 배경색 */
+        justify-content: center;
+        align-items: center;
     }
 
-    /* 돌아가기 버튼: 배경 없이 아이콘만 표시 */
+    #ending-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* 돌아가기 버튼 (아이콘) */
     #back-to-game {
         position: absolute;
         bottom: 50px;
@@ -76,12 +86,13 @@
         transform: translateX(-50%);
         background: none;
         border: none;
-        font-size: 50px;
+        font-size: 60px;
         cursor: pointer;
-        opacity: 0;
-        display: none;
+        opacity: 0; /* 초기 상태 투명 */
+        display: none; /* 초기 상태 숨김 */
         transition: opacity 1s;
         z-index: 800;
+        line-height: 1;
     }
         /* 엔딩 레이어 스타일 통합 */
         #ending-layer { 
