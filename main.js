@@ -162,23 +162,26 @@ container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefau
 container.addEventListener('touchend', handleDrop);
 
 // 충돌 감지 (머지)
-Events.on(engine, 'collisionStart', (event) => {
-    event.pairs.forEach((pair) => {
-        const { bodyA, bodyB } = pair;
-        if (bodyA.label === bodyB.label && bodyA.label.startsWith('fruit_')) {
-            if (bodyA.isMerging || bodyB.isMerging) return;
-            const level = parseInt(bodyA.label.split('_')[1]);
-            if (level < 11) {
-                bodyA.isMerging = true; bodyB.isMerging = true;
-                mergeQueue.push({ 
-                    bodyA, bodyB, level, 
-                    x: (bodyA.position.x + bodyB.position.x) / 2, 
-                    y: (bodyA.position.y + bodyB.position.y) / 2 
-                });
+Events.on(engine, 'afterUpdate', () => {
+    // 1. 머지 처리
+    while (mergeQueue.length > 0) {
+        const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
+        if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
+            Composite.remove(world, [bodyA, bodyB]);
+            
+            const nextLevel = level + 1; // nextLevel 정의
+            const nextFruit = createFruit(x, y, nextLevel);
+            Composite.add(world, nextFruit);
+            
+            score += FRUITS[level - 1].score;
+            document.getElementById('score').innerText = score;
+            
+            // 수박 달성 시 엔딩
+            if (nextLevel === 11) {
+                setTimeout(startEndingSequence, 500);
             }
         }
-    });
-});
+    }
 
 // 업데이트 루프
 Events.on(engine, 'afterUpdate', () => {
