@@ -112,7 +112,7 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
-        const texturePath = `./asset/${prefix}${indexStr}.png`;
+        const texturePath = `asset/${prefix}${indexStr}.png`;
         
         const img = new Image();
         img.src = texturePath;
