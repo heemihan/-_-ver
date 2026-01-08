@@ -187,6 +187,41 @@ Events.on(engine, 'afterUpdate', () => {
     }
 });
 
+const skinBtn = document.getElementById('skin-btn');
+
+if (skinBtn) {
+    skinBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // 클릭 시 과일이 떨어지는 것 방지
+
+        // 1. 상태 전환 (A <-> B)
+        currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+        const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
+        
+        console.log("현재 스킨 모드:", currentSkinType);
+
+        // 2. 화면의 모든 과일 수집
+        const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
+        if (currentFruit) allFruits.push(currentFruit);
+
+        // 3. 이미지 교체
+        allFruits.forEach(body => {
+            const level = parseInt(body.label.split('_')[1]);
+            const indexStr = String(level - 1).padStart(2, '0');
+            const texturePath = `./asset/${prefix}${indexStr}.png`;
+
+            const img = new Image();
+            img.src = texturePath;
+            img.onload = function() {
+                body.render.sprite.texture = texturePath;
+                const fruitData = FRUITS[level - 1];
+                const scale = (fruitData.radius * 2) / img.width;
+                body.render.sprite.xScale = scale * 1.05;
+                body.render.sprite.yScale = scale * 1.05;
+            };
+        });
+    });
+}
+
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
 spawnFruit();
