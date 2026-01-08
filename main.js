@@ -60,8 +60,8 @@ function spawnFruit() {
     if (isGameOver) return;
     
     // 테스트용: 과일을 생성하지 않고 바로 엔딩 실행
-    startEndingSequence(); 
-    return;
+   function startEndingSequence() {
+    isGameOver = true;
     
     if (isGameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
@@ -73,7 +73,41 @@ function spawnFruit() {
 // --- 스킨 변경 로직 시작 ---
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
-    
+    // 1. 배경 갈라짐 애니메이션 시작
+    document.getElementById('bg-left').classList.add('split-left');
+    document.getElementById('bg-right').classList.add('split-right');
+
+    setTimeout(() => {
+        // 2. 엔딩 레이어(GIF) 등장
+        const endingLayer = document.getElementById('ending-layer');
+        const gifContainer = document.getElementById('ending-gif-container');
+        const imgContainer = document.getElementById('ending-img-container');
+        const backBtn = document.getElementById('back-to-game');
+
+        endingLayer.style.display = 'block';
+
+        // 3. 3초 후 GIF 숨기고 JPG 서서히 나타내기
+        setTimeout(() => {
+            gifContainer.style.display = 'none';
+            imgContainer.style.display = 'block';
+            
+            // 브라우저가 display:block을 인식한 후 opacity를 변경해야 transition이 먹힙니다.
+            setTimeout(() => {
+                imgContainer.style.opacity = '1';
+            }, 50);
+
+            // 4. JPG가 나타나기 시작한 지 3초 후에 돌아가기 버튼 표시
+            setTimeout(() => {
+                backBtn.style.display = 'block';
+                setTimeout(() => {
+                    backBtn.style.opacity = '1';
+                }, 50);
+            }, 3000);
+
+        }, 3000); // GIF 노출 시간
+    }, 1200); // 배경 갈라지는 속도에 맞춤
+}
+                                                     
     // A <-> B 타입 전환
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
