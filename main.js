@@ -98,17 +98,6 @@ document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); loc
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
-const handleMove = (e) => {
-    if (currentFruit && canDrop && !isGameOver) {
-        const rect = container.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let x = clientX - rect.left;
-        const level = parseInt(currentFruit.label.split('_')[1]);
-        const radius = FRUITS[level - 1].radius;
-        x = Math.max(radius + 25, Math.min(375 - radius, x));
-        Body.setPosition(currentFruit, { x: x, y: 80 });
-    }
-};
 document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
 
 const handleMove = (e) => {
