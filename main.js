@@ -36,7 +36,7 @@ Composite.add(world, [
 // 과일 생성 함수
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
-    const indexStr = String(level - 1)
+    const indexStr = String(level - 1).padStart(2, '0');
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     const texturePath = `./asset/${prefix}${indexStr}.png`;
 
