@@ -62,6 +62,40 @@ function spawnFruit() {
     // 테스트용: 과일을 생성하지 않고 바로 엔딩 실행
    function startEndingSequence() {
     isGameOver = true;
+
+       document.getElementById('bg-left').classList.add('split-left');
+    document.getElementById('bg-right').classList.add('split-right');
+
+    setTimeout(() => {
+        const endingLayer = document.getElementById('ending-layer');
+        const gifContainer = document.getElementById('ending-gif-container');
+        const imgContainer = document.getElementById('ending-img-container');
+        const backBtn = document.getElementById('back-to-game');
+
+        // 2. 전체 엔딩 레이어 표시
+        endingLayer.style.display = 'block';
+
+        // 3. 3초 후 GIF 종료 및 JPG 페이드 인 시작
+        setTimeout(() => {
+            gifContainer.style.display = 'none';
+            imgContainer.style.display = 'flex'; // 중앙 정렬 유지를 위해 flex 사용
+            
+            // 짧은 지연 후 투명도를 조절해야 transition(페이드)이 작동함
+            setTimeout(() => {
+                imgContainer.style.opacity = '1';
+            }, 50);
+
+            // 4. JPG가 나타나기 시작한 후 3초 뒤에 돌아가기 버튼 등장
+            setTimeout(() => {
+                backBtn.style.display = 'block';
+                setTimeout(() => {
+                    backBtn.style.opacity = '1';
+                }, 50);
+            }, 3000);
+
+        }, 3000);
+    }, 1200);
+}
     
     if (isGameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
