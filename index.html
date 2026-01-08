@@ -85,27 +85,26 @@
     }
         /* 엔딩 레이어 스타일 통합 */
         #ending-layer { 
-            display: none; position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%; background: #fff; z-index: 700; 
-        }
+        display: none; position: absolute; top: 0; left: 0; 
+        width: 100%; height: 100%; background: #fff; z-index: 700; 
+    }
+    #ending-gif-container, #ending-img-container {
+        width: 100%; height: 100%;
+        display: flex; justify-content: center; align-items: center;
+    }
+    #ending-img-container {
+        display: none; position: relative; opacity: 0;
+        transition: opacity 2s ease-in-out; /* JPG 페이드 인 효과 */
+    }
+    #ending-img-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        #ending-gif-container, #ending-img-container {
-            width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        #ending-img-container {
-            display: none; position: relative; opacity: 0;
-            transition: opacity 2s ease-in-out;
-        }
-
-        #ending-img-container img { width: 100%; height: 100%; object-fit: cover; }
-
-        #back-to-game {
-            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-            background: none; border: none; font-size: 50px; cursor: pointer;
-            opacity: 0; display: none; transition: opacity 1s; z-index: 800;
-        }
+    /* 돌아가기 버튼 (단순 아이콘) */
+    #back-to-game {
+        position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+        background: none; border: none; font-size: 60px; /* 아이콘 크기 */
+        cursor: pointer; opacity: 0; display: none; 
+        transition: opacity 1s; z-index: 800;
+    }
     </style>
 </head>
 <body>
@@ -131,15 +130,15 @@
             <p>최종 점수: <span id="final-score">0</span></p>
             <button id="retry-btn" style="padding:10px 20px; cursor:pointer;">다시 도전</button>
         </div>
-        <div id="ending-layer">
-    <div id="ending-gif-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-        <img src="asset/thank.gif" style="width: 100%; height: auto;">
+       <div id="ending-layer">
+    <div id="ending-gif-container">
+        <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
     </div>
     <div id="ending-img-container">
-        <img src="asset/ending.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+        <img src="asset/ending.jpg">
         <button id="back-to-game">↩️</button>
     </div>
-    </div>
+</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="main.js"></script>
 </body>
