@@ -109,6 +109,7 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
             body.render.sprite.yScale = scale * 1.05;
         };
     });
+    console.log("Skin changed to:", currentSkinType);
 });
 
 document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
