@@ -65,6 +65,34 @@
             width: 100%; height: 100%; background: #fff; z-index: 700; text-align: center; 
         }
     </style>
+    /* ... 기존 스타일 유지 ... */
+
+    /* JPG가 서서히 나타나게 하는 애니메이션용 설정 */
+    #ending-img-container {
+        display: none; 
+        width: 100%; 
+        height: 100%; 
+        position: relative;
+        opacity: 0;
+        transition: opacity 2s ease-in-out; /* 2초 동안 페이드 인 */
+    }
+
+    /* 돌아가기 버튼: 배경 없이 아이콘만 표시 */
+    #back-to-game {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: none;
+        border: none;
+        font-size: 50px;
+        cursor: pointer;
+        opacity: 0;
+        display: none;
+        transition: opacity 1s;
+        z-index: 800;
+    }
+</style>
 </head>
 <body>
     <div id="game-container">
@@ -90,15 +118,14 @@
             <button id="retry-btn" style="padding:10px 20px; cursor:pointer;">다시 도전</button>
         </div>
         <div id="ending-layer">
-            <div id="ending-gif-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
-                <img src="asset/thank.gif" style="width: 100%; height: auto;">
-            </div>
-            <div id="ending-img-container" style="display: none; width: 100%; height: 100%; position: relative;">
-                <img src="asset/ending.jpg" style="width: 100%; height: 100%; object-fit: cover;">
-                <button id="back-to-game" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background: rgba(0,0,0,0.6); color: white; border: 1px solid #fff; border-radius: 5px; cursor: pointer;">게임으로 돌아가기</button>
-            </div>
-        </div>
+    <div id="ending-gif-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+        <img src="asset/thank.gif" style="width: 100%; height: auto;">
     </div>
+    <div id="ending-img-container">
+        <img src="asset/ending.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+        <button id="back-to-game">↩️</button>
+    </div>
+</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="main.js"></script>
 </body>
