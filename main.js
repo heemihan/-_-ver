@@ -93,17 +93,19 @@ function startEndingSequence() {
 // 스킨 변경 로직
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
-    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+   currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     if (currentFruit) allFruits.push(currentFruit);
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
-        const texturePath = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
+        const indexStr = String(level - 1).padStart(2, '0');
+        const texturePath = `./asset/${prefix}${indexStr}.png`;
         const img = new Image();
         img.src = texturePath;
         img.onload = function() {
             body.render.sprite.texture = texturePath;
+            const fruitData = FRUITS[level - 1];
             const scale = (FRUITS[level - 1].radius * 2) / img.width;
             body.render.sprite.xScale = scale * 1.05;
             body.render.sprite.yScale = scale * 1.05;
