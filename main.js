@@ -64,8 +64,10 @@ function spawnFruit() {
 
 // 엔딩 시퀀스 함수 (독립적으로 선언)
 function startEndingSequence() {
+    if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
     isGameOver = true;
-    // 배경 갈라짐 애니메이션 실행
+
+    // 1. 배경 갈라짐
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
 
@@ -75,27 +77,28 @@ function startEndingSequence() {
         const imgContainer = document.getElementById('ending-img-container');
         const backBtn = document.getElementById('back-to-game');
 
+        // 2. GIF 레이어 표시
         endingLayer.style.display = 'block';
 
-        // 1. 먼저 GIF를 3초간 보여줌
+        // 3. 3초 후 JPG로 전환
         setTimeout(() => {
-            gifContainer.style.display = 'none';
-            imgContainer.style.display = 'flex'; // JPG 컨테이너 표시
+            gifContainer.style.display = 'none'; // GIF 숨김
+            imgContainer.style.display = 'flex'; // JPG 컨테이너를 flex로 표시
             
-            // 2. JPG 서서히 나타남 (2초 페이드 인)
+            // 중요: display: flex가 적용된 후 투명도를 조절해야 애니메이션이 작동합니다.
             setTimeout(() => {
                 imgContainer.style.opacity = '1';
-            }, 50);
+            }, 100); 
 
-            // 3. JPG가 나타나기 시작한 후 '3초 뒤'에 돌아가기 버튼 등장
+            // 4. JPG가 나타나기 시작한 후 3초 뒤에 버튼 등장
             setTimeout(() => {
                 backBtn.style.display = 'block';
                 setTimeout(() => {
                     backBtn.style.opacity = '1';
-                }, 50);
-            }, 3000); // <-- 3초 대기 시간
+                }, 100);
+            }, 3000);
 
-        }, 3000); // GIF 재생 시간
+        }, 3000); // GIF 노출 시간
     }, 1200);
 }
 
