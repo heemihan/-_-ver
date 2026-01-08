@@ -22,7 +22,13 @@ const FRUITS = [
 const render = Render.create({
     element: container,
     engine: engine,
-    options: { width: 400, height: 600, wireframes: false, background: 'transparent' }
+    options: { 
+        width: 400, 
+        height: 600, 
+        wireframes: false, 
+        background: 'transparent',
+        pixelRatio: window.devicePixelRatio || 1 // 모바일 고해상도 대응
+    }
 });
 
 // 벽 설정
