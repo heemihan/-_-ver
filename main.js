@@ -193,7 +193,9 @@ Events.on(engine, 'afterUpdate', () => {
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
             
-            if (level + 1 === 11) setTimeout(startEndingSequence, 500);
+         if (nextLevel === 11) {
+                setTimeout(startEndingSequence, 500);
+            }
         }
     }
 
