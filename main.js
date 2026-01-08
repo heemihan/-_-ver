@@ -193,20 +193,22 @@ Events.on(engine, 'afterUpdate', () => {
 
     // 2. 게임 오버 체크 (간섭 해결 핵심 부분)
     if (!isGameOver) {
-        // 월드 내의 모든 바디 중 '과일'이면서 '고정(Static)되지 않은' 것들만 필터링
-        const fruits = Composite.allBodies(world).filter(b => 
-            b.label && 
-            b.label.startsWith('fruit_') && 
-            !b.isStatic && // [핵심] 대기 중인(isStatic: true) 과일은 제외됨
-            b !== currentFruit // [핵심] 현재 마우스로 잡고 있는 과일은 제외됨
-        );
+    const fruits = Composite.allBodies(world).filter(b => 
+        b.label && 
+        b.label.startsWith('fruit_') && 
+        !b.isStatic && 
+        b !== currentFruit
+    );
 
-        for (let fruit of fruits) {
-            // 과일 생성 후 최소 2초가 지나야 체크 시작
-            const age = Date.now() - (fruit.spawnTime || 0);
+    for (let fruit of fruits) {
+        const age = Date.now() - (fruit.spawnTime || 0);
 
-            // 2000ms(2초) 유예 기간 부여 및 데드라인 체크
-            if (age > 2000 && fruit.position.y < 120 && fruit.velocity.y > -0.5) {
+        // 수정 포인트 1: 유예 기간을 3초(3000ms)로 늘림
+        // 수정 포인트 2: 데드라인을 120에서 90으로 높임 (더 위쪽으로)
+        // 수정 포인트 3: 속도 조건을 더 세밀하게 조정
+        if (age > 3000 && fruit.position.y < 90) { 
+            // 미세하게 떨리는 것을 방지하기 위해 속도 절대값을 체크
+            if (Math.abs(fruit.velocity.y) < 0.2) {
                 isGameOver = true;
                 document.getElementById('final-score').innerText = score;
                 document.getElementById('game-over').style.display = 'block';
@@ -214,7 +216,7 @@ Events.on(engine, 'afterUpdate', () => {
             }
         }
     }
-});
+}
 
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
