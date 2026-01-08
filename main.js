@@ -99,19 +99,22 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
+   // 월드 내 모든 과일과 대기 중인 과일 수집
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     if (currentFruit) allFruits.push(currentFruit);
 
+    // 각 과일의 텍스처 업데이트
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
         const fruitData = FRUITS[level - 1];
 
-        body.render.sprite.texture = texturePath;
+        body.render.sprite.texture = texturePath; // 텍스처 변경
+
         const img = new Image();
         img.src = texturePath;
-        img.onload = function() {
+        img.onload = () => { // 화살표 함수를 사용하여 간결하게 처리
             const scale = (fruitData.radius * 2) / img.width;
             body.render.sprite.xScale = scale * 1.05;
             body.render.sprite.yScale = scale * 1.05;
