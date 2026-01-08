@@ -4,8 +4,7 @@ const engine = Engine.create();
 const world = engine.world;
 const container = document.getElementById('game-container');
 
-// 상태 변수
-let currentSkinType = 'A'; // 기본값은 'A' (fruitXX.png)
+let currentSkinType = 'A';
 let score = 0;
 let isGameOver = false;
 let currentFruit = null;
@@ -32,7 +31,6 @@ Composite.add(world, [
     Bodies.rectangle(390, 300, 20, 600, wallOptions)
 ]);
 
-// 과일 생성 함수: 현재 currentSkinType에 맞춰 텍스처 경로 설정
 function createFruit(x, y, level, isStatic = false) {
     const fruitData = FRUITS[level - 1];
     const indexStr = String(level - 1).padStart(2, '0');
@@ -58,61 +56,21 @@ function createFruit(x, y, level, isStatic = false) {
 
 function spawnFruit() {
     if (isGameOver) return;
-    
-    // 테스트용: 과일을 생성하지 않고 바로 엔딩 실행
-   function startEndingSequence() {
-    isGameOver = true;
-
-       document.getElementById('bg-left').classList.add('split-left');
-    document.getElementById('bg-right').classList.add('split-right');
-
-    setTimeout(() => {
-        const endingLayer = document.getElementById('ending-layer');
-        const gifContainer = document.getElementById('ending-gif-container');
-        const imgContainer = document.getElementById('ending-img-container');
-        const backBtn = document.getElementById('back-to-game');
-
-        // 2. 전체 엔딩 레이어 표시
-        endingLayer.style.display = 'block';
-
-        // 3. 3초 후 GIF 종료 및 JPG 페이드 인 시작
-        setTimeout(() => {
-            gifContainer.style.display = 'none';
-            imgContainer.style.display = 'flex'; // 중앙 정렬 유지를 위해 flex 사용
-            
-            // 짧은 지연 후 투명도를 조절해야 transition(페이드)이 작동함
-            setTimeout(() => {
-                imgContainer.style.opacity = '1';
-            }, 50);
-
-            // 4. JPG가 나타나기 시작한 후 3초 뒤에 돌아가기 버튼 등장
-            setTimeout(() => {
-                backBtn.style.display = 'block';
-                setTimeout(() => {
-                    backBtn.style.opacity = '1';
-                }, 50);
-            }, 3000);
-
-        }, 3000);
-    }, 1200);
-}
-    
-    if (isGameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
     currentFruit = createFruit(200, 80, level, true);
     Composite.add(world, currentFruit);
     canDrop = true;
 }
 
-// --- 스킨 변경 로직 시작 ---
-document.getElementById('skin-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    // 1. 배경 갈라짐 애니메이션 시작
+// 엔딩 시퀀스 함수
+function startEndingSequence() {
+    if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
+    isGameOver = true;
+
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
 
     setTimeout(() => {
-        // 2. 엔딩 레이어(GIF) 등장
         const endingLayer = document.getElementById('ending-layer');
         const gifContainer = document.getElementById('ending-gif-container');
         const imgContainer = document.getElementById('ending-img-container');
@@ -120,49 +78,37 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
 
         endingLayer.style.display = 'block';
 
-        // 3. 3초 후 GIF 숨기고 JPG 서서히 나타내기
         setTimeout(() => {
             gifContainer.style.display = 'none';
-            imgContainer.style.display = 'block';
+            imgContainer.style.display = 'flex'; 
             
-            // 브라우저가 display:block을 인식한 후 opacity를 변경해야 transition이 먹힙니다.
-            setTimeout(() => {
-                imgContainer.style.opacity = '1';
-            }, 50);
+            setTimeout(() => { imgContainer.style.opacity = '1'; }, 50);
 
-            // 4. JPG가 나타나기 시작한 지 3초 후에 돌아가기 버튼 표시
             setTimeout(() => {
                 backBtn.style.display = 'block';
-                setTimeout(() => {
-                    backBtn.style.opacity = '1';
-                }, 50);
+                setTimeout(() => { backBtn.style.opacity = '1'; }, 50);
             }, 3000);
 
-        }, 3000); // GIF 노출 시간
-    }, 1200); // 배경 갈라지는 속도에 맞춤
+        }, 3000);
+    }, 1200);
 }
-                                                     
-    // A <-> B 타입 전환
+
+// 스킨 버튼 리스너
+document.getElementById('skin-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
-    // 1. 월드 내의 모든 과일 몸체 확보
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
-    
-    // 2. 현재 조작 중인(공중에 떠 있는) 과일도 리스트에 추가
     if (currentFruit) allFruits.push(currentFruit);
 
-    // 3. 모든 과일의 이미지 경로와 스케일 실시간 업데이트
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
         const fruitData = FRUITS[level - 1];
 
-        // 텍스처 교체
         body.render.sprite.texture = texturePath;
-
-        // 새 이미지 로드 후 스케일 재설정 (이미지가 사라지는 현상 방지)
         const img = new Image();
         img.src = texturePath;
         img.onload = function() {
@@ -172,23 +118,11 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
         };
     });
 });
-// --- 스킨 변경 로직 끝 ---
-
-// 엔딩 및 버튼 리스너
-function startEndingSequence() {
-    isGameOver = true;
-    document.getElementById('ending-layer').style.display = 'block';
-    setTimeout(() => {
-        document.getElementById('ending-gif-container').style.display = 'none';
-        document.getElementById('ending-img-container').style.display = 'block';
-    }, 3000);
-}
 
 document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
-// 마우스 및 터치 제어
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
         const rect = container.getBoundingClientRect();
@@ -216,7 +150,6 @@ container.addEventListener('mousedown', handleDrop);
 container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', handleDrop);
 
-// 충돌 감지 및 합성
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
@@ -231,7 +164,6 @@ Events.on(engine, 'collisionStart', (event) => {
     });
 });
 
-// 업데이트 루프
 Events.on(engine, 'afterUpdate', () => {
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
@@ -244,7 +176,6 @@ Events.on(engine, 'afterUpdate', () => {
             if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
-    // 게임 오버 체크
     if (!isGameOver && !canDrop) {
         const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
         for (let fruit of fruits) {
