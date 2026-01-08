@@ -68,13 +68,14 @@ function spawnFruit() {
 
 // 엔딩 시퀀스 함수
 function startEndingSequence() {
-    if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
     isGameOver = true;
-
+    
+    // 1. 배경 갈라짐 애니메이션 시작
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
 
     setTimeout(() => {
+        // 2. 엔딩 레이어(GIF) 등장
         const endingLayer = document.getElementById('ending-layer');
         const gifContainer = document.getElementById('ending-gif-container');
         const imgContainer = document.getElementById('ending-img-container');
@@ -82,19 +83,26 @@ function startEndingSequence() {
 
         endingLayer.style.display = 'block';
 
+        // 3. 3초 후 GIF 숨기고 JPG 서서히 나타내기
         setTimeout(() => {
             gifContainer.style.display = 'none';
-            imgContainer.style.display = 'flex'; 
+            imgContainer.style.display = 'block';
             
-            setTimeout(() => { imgContainer.style.opacity = '1'; }, 50);
+            // 브라우저가 display:block을 인식한 후 opacity를 변경해야 transition이 먹힙니다.
+            setTimeout(() => {
+                imgContainer.style.opacity = '1';
+            }, 50);
 
+            // 4. JPG가 나타나기 시작한 지 3초 후에 돌아가기 버튼 표시
             setTimeout(() => {
                 backBtn.style.display = 'block';
-                setTimeout(() => { backBtn.style.opacity = '1'; }, 50);
+                setTimeout(() => {
+                    backBtn.style.opacity = '1';
+                }, 50);
             }, 3000);
 
-        }, 3000);
-    }, 1200);
+        }, 3000); // GIF 노출 시간
+    }, 1200); // 배경 갈라지는 속도에 맞춤
 }
 
 // 스킨 버튼 리스너
