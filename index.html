@@ -23,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* 배경 갈라짐 효과 레이어 */
+        /* 배경 갈라짐 효과 */
         #background-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1; pointer-events: none;
@@ -60,62 +60,30 @@
             text-align: center; border-radius: 20px; display: none; z-index: 600;
         }
 
+        /* 엔딩 레이어 스타일 통합 */
         #ending-layer { 
             display: none; position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%; background: #fff; z-index: 700; text-align: center; 
+            width: 100%; height: 100%; background: #fff; z-index: 700; 
+        }
+
+        #ending-gif-container, #ending-img-container {
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #ending-img-container {
+            display: none; position: relative; opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        #ending-img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        #back-to-game {
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+            background: none; border: none; font-size: 50px; cursor: pointer;
+            opacity: 0; display: none; transition: opacity 1s; z-index: 800;
         }
     </style>
-    #ending-layer { 
-        display: none; 
-        position: absolute; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        background: #fff; 
-        z-index: 700; 
-    }
-
-    /* 컨테이너들이 화면 꽉 차게 정중앙 배치되도록 설정 */
-    #ending-gif-container, #ending-img-container {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center; /* 가로 중앙 */
-        align-items: center;    /* 세로 중앙 */
-    }
-
-    /* JPG 컨테이너: 기본적으로 숨김 + 페이드 효과 준비 */
-    #ending-img-container {
-        display: none; 
-        position: relative;
-        opacity: 0;
-        transition: opacity 2s ease-in-out;
-    }
-
-    /* 이미지 크기 강제 고정 */
-    #ending-img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* 돌아가기 버튼 (아이콘) */
-    #back-to-game {
-        position: absolute;
-        bottom: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: none;
-        border: none;
-        font-size: 50px;
-        cursor: pointer;
-        opacity: 0;
-        display: none;
-        transition: opacity 1s;
-        z-index: 800;
-    }
-</style>
 </head>
 <body>
     <div id="game-container">
@@ -124,11 +92,6 @@
             <div id="bg-right" class="bg-part"></div>
         </div>
         <div class="top-btn-group">
-
-            <button onclick="startEndingSequence()" style="position:fixed; top:70px; right:15px; z-index:9999;">
-    엔딩 테스트
-</button>
-            
             <img src="asset/imgchange.png" class="top-btn" id="skin-btn" alt="Skin">
             <img src="asset/resetGame.png" class="top-btn" id="reset-btn" alt="Reset">
         </div>
@@ -141,14 +104,15 @@
             <button id="retry-btn" style="padding:10px 20px; cursor:pointer;">다시 도전</button>
         </div>
         <div id="ending-layer">
-    <div id="ending-gif-container">
-        <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
+            <div id="ending-gif-container">
+                <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
+            </div>
+            <div id="ending-img-container">
+                <img src="asset/ending.jpg">
+                <button id="back-to-game">↩️</button>
+            </div>
+        </div>
     </div>
-    <div id="ending-img-container">
-        <img src="asset/ending.jpg">
-        <button id="back-to-game">↩️</button>
-    </div>
-</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="main.js"></script>
 </body>
