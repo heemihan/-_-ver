@@ -40,9 +40,12 @@
         .split-right { transform: translateX(100%); }
 
         canvas {
-    display: block; /* !important 제거 */
-    position: relative; /* absolute에서 relative로 변경 */
-    margin: 0 auto; /* 중앙 정렬 방식 변경 */
+    display: block;
+    position: absolute; /* relative에서 absolute로 변경하여 컨테이너에 고정 */
+    top: 0;
+    left: 0;
+    width: 100% !important; /* 모바일 대응: 부모 너비에 맞춤 */
+    height: 100% !important; /* 모바일 대응: 부모 높이에 맞춤 */
     z-index: 10;
 }
 
