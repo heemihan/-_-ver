@@ -3,15 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>수박 게임 - 최종 통합본</title>
+    <title>수박 게임 - 스킨 시스템 통합본</title>
     <style>
-
-         /* 엔딩 레이어 및 컨테이너 */
-        #ending-layer { 
-            display: none; position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%; background: #fff; z-index: 700; 
-        }
-        
         body {
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
@@ -30,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* 배경 갈라짐 효과 */
+        /* 배경 및 애니메이션 */
         #background-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1; pointer-events: none;
@@ -52,55 +45,44 @@
             z-index: 10;
         }
 
+        /* UI 요소 */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
         .score-board { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 28px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         
         .top-btn-group {
             position: absolute; top: 15px; right: 15px;
-            display: flex; gap: 10px; pointer-events: auto !important; z-index: 500 !important;
+            display: flex; gap: 10px; pointer-events: auto; z-index: 500;
         }
-        .top-btn { width: 40px; height: 40px; cursor: pointer; object-fit: contain; }
+        .top-btn { width: 40px; height: 40px; cursor: pointer; object-fit: contain; transition: transform 0.1s; }
+        .top-btn:active { transform: scale(0.9); }
 
+        /* 게임 오버 및 엔딩 */
         .game-over {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85); color: white; padding: 40px;
             text-align: center; border-radius: 20px; display: none; z-index: 600;
-        } /* 여기서 중괄호가 닫히지 않았던 점을 수정했습니다 */
+        }
 
-       
-
+        #ending-layer { 
+            display: none; position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; background: #fff; z-index: 700; 
+        }
         #ending-gif-container, #ending-img-container {
             width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
         }
-
         #ending-img-container {
             display: none; position: relative; opacity: 0;
-            transition: opacity 2s ease-in-out;
-            background: #fff;
+            transition: opacity 2s ease-in-out; background: #fff;
         }
+        #ending-img-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        #ending-img-container img {
-            width: 100%; height: 100%;
-            object-fit: cover;
+        #back-to-game {
+            position: absolute; top: 20px; left: 20px;
+            background: none; border: none; font-size: 30px;
+            cursor: pointer; opacity: 0; display: none;
+            transition: opacity 1s; z-index: 999;
         }
-
-        /* 돌아가기 버튼 (아이콘) */
-       #back-to-game {
-    position: absolute;
-    top: 20px;            /* 위에서 20px */
-    left: 20px;           /* 왼쪽에서 20px */
-    background: none;     /* 배경 원형 제거 */
-    border: none;         /* 테두리 제거 */
-    font-size: 30px;      /* 사이즈 30px로 고정 */
-    cursor: pointer;
-    opacity: 0;           /* 초기 투명 */
-    display: none;        /* 초기 숨김 */
-    transition: opacity 1s;
-    z-index: 999;         /* 최상단 */
-    line-height: 1;
-    padding: 0;           /* 여백 제거 */
-}
     </style>
 </head>
 <body>
@@ -110,9 +92,8 @@
             <div id="bg-right" class="bg-part"></div>
         </div>
         <div class="top-btn-group">
-         <img src="asset/imgchange.png" class="top-btn" id="skin-btn" alt="Skin">
-            <img src="asset/resetGame.png" class="top-btn" id="reset-btn" alt="Reset">
-            
+            <img src="asset/imgchange.png" class="top-btn" id="skin-btn" alt="스킨 변경">
+            <img src="asset/resetGame.png" class="top-btn" id="reset-btn" alt="초기화">
         </div>
         <div id="ui-layer">
             <div class="score-board">SCORE: <span id="score">0</span></div>
@@ -127,7 +108,7 @@
                 <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
             </div>
             <div id="ending-img-container">
-                <img src="asset/ending.jpg" alt="Ending Image">
+                <img src="asset/ending.jpg" alt="엔딩 이미지">
                 <button id="back-to-game">↩️</button>
             </div>
         </div>
