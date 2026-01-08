@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>수박 게임 - 최종 통합본</title>
     <style>
+
+         /* 엔딩 레이어 및 컨테이너 */
+        #ending-layer { 
+            display: none; position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; background: #fff; z-index: 700; 
+        }
+        
         body {
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
@@ -60,11 +67,7 @@
             text-align: center; border-radius: 20px; display: none; z-index: 600;
         } /* 여기서 중괄호가 닫히지 않았던 점을 수정했습니다 */
 
-        /* 엔딩 레이어 및 컨테이너 */
-        #ending-layer { 
-            display: none; position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%; background: #fff; z-index: 700; 
-        }
+       
 
         #ending-gif-container, #ending-img-container {
             width: 100%; height: 100%;
