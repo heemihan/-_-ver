@@ -14,14 +14,14 @@
         }
 
         #game-container {
-            position: relative;
-            width: 400px; height: 600px;
-            max-width: 100vw; max-height: 100vh;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
-            border: 4px solid #333; border-radius: 12px;
-            background-color: #ffeeb0;
-            overflow: hidden;
-        }
+    position: relative;
+    width: 400px; 
+    height: 600px;
+    max-width: 100vw; 
+    max-height: 100vh;
+    margin: 0 auto;
+    overflow: hidden;
+}
 
         /* 배경 및 애니메이션 */
         #background-layer {
@@ -41,11 +41,11 @@
 
         canvas {
     display: block;
-    position: absolute; /* relative에서 absolute로 변경하여 컨테이너에 고정 */
+    position: absolute; /* relative에서 absolute로 변경 */
     top: 0;
     left: 0;
-    width: 100% !important; /* 모바일 대응: 부모 너비에 맞춤 */
-    height: 100% !important; /* 모바일 대응: 부모 높이에 맞춤 */
+    width: 100% !important;
+    height: 100% !important;
     z-index: 10;
 }
 
