@@ -199,18 +199,22 @@ Events.on(engine, 'afterUpdate', () => {
 
     // 게임 오버 체크
     if (!isGameOver) {
-        const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
+       const fruits = Composite.allBodies(world).filter(b => 
+        b.label && 
+        b.label.startsWith('fruit_') && 
+        !b.isStatic &&
+        b !== currentFruit
+    );
         for (let fruit of fruits) {
             if (fruit.position.y < 120 && fruit.velocity.y > -0.5) {
-                if (Date.now() - (fruit.spawnTime || 0) > 1500) {
-                    isGameOver = true;
-                    document.getElementById('game-over').style.display = 'block';
-                    document.getElementById('final-score').innerText = score;
-                    break;
-                }
-            }
+                if (age > 2000 && fruit.position.y < 120 && fruit.velocity.y > -0.5) {
+            isGameOver = true;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('game-over').style.display = 'block';
+            break;
         }
     }
+}
 });
 
 Render.run(render);
