@@ -105,7 +105,7 @@ function startEndingSequence() {
 // 스킨 버튼 리스너 (괄호 오류 수정됨)
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
-    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+  currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
