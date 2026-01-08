@@ -58,82 +58,47 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85); color: white; padding: 40px;
             text-align: center; border-radius: 20px; display: none; z-index: 600;
-        
-       /* JPG 컨테이너: JS에서 display를 flex로 바꿀 때 투명도 애니메이션이 먹히도록 설정 */
-    #ending-img-container {
-        display: none; /* 초기 상태 숨김 */
-        width: 100%;
-        height: 100%;
-        position: relative;
-        opacity: 0;
-        transition: opacity 2s ease-in-out; /* 2초간 페이드 인 */
-        background: #fff; /* 혹시 모를 빈 화면 방지용 배경색 */
-        justify-content: center;
-        align-items: center;
-    }
+        } /* 여기서 중괄호가 닫히지 않았던 점을 수정했습니다 */
 
-    #ending-img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* 돌아가기 버튼 (아이콘) */
-    #back-to-game {
-        position: absolute;
-        bottom: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: none;
-        border: none;
-        font-size: 60px;
-        cursor: pointer;
-        opacity: 0; /* 초기 상태 투명 */
-        display: none; /* 초기 상태 숨김 */
-        transition: opacity 1s;
-        z-index: 800;
-        line-height: 1;
-    }
-        /* 엔딩 레이어 스타일 통합 */
+        /* 엔딩 레이어 및 컨테이너 */
         #ending-layer { 
-        display: none; position: absolute; top: 0; left: 0; 
-        width: 100%; height: 100%; background: #fff; z-index: 700; 
-    }
-    #ending-img-container {
-        display: none; /* 초기 상태 숨김 */
-        width: 100%;
-        height: 100%;
-        position: relative;
-        opacity: 0;
-        transition: opacity 2s ease-in-out; /* 2초간 페이드 인 */
-        background: #fff; /* 혹시 모를 빈 화면 방지용 배경색 */
-        justify-content: center;
-        align-items: center;
-    }
+            display: none; position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; background: #fff; z-index: 700; 
+        }
 
-    #ending-img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+        #ending-gif-container, #ending-img-container {
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
 
-    /* 돌아가기 버튼 (아이콘) */
-    #back-to-game {
-        position: absolute;
-        bottom: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: none;
-        border: none;
-        font-size: 60px;
-        cursor: pointer;
-        opacity: 0; /* 초기 상태 투명 */
-        display: none; /* 초기 상태 숨김 */
-        transition: opacity 1s;
-        z-index: 800;
-        line-height: 1;
-    }
-</style>
+        #ending-img-container {
+            display: none; position: relative; opacity: 0;
+            transition: opacity 2s ease-in-out;
+            background: #fff;
+        }
+
+        #ending-img-container img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        /* 돌아가기 버튼 (아이콘) */
+        #back-to-game {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            font-size: 60px;
+            cursor: pointer;
+            opacity: 0;
+            display: none;
+            transition: opacity 1s;
+            z-index: 800;
+            line-height: 1;
+        }
+    </style>
 </head>
 <body>
     <div id="game-container">
@@ -144,11 +109,9 @@
         <div class="top-btn-group">
             <img src="asset/imgchange.png" class="top-btn" id="skin-btn" alt="Skin">
             <img src="asset/resetGame.png" class="top-btn" id="reset-btn" alt="Reset">
-            
-            <button onclick="startEndingSequence()" style="position:fixed; top:70px; right:15px; z-index:9999;">
-    엔딩 테스트
-</button>
-            
+            <button onclick="startEndingSequence()" style="position:fixed; top:70px; right:15px; z-index:9999; cursor:pointer;">
+                엔딩 테스트
+            </button>
         </div>
         <div id="ui-layer">
             <div class="score-board">SCORE: <span id="score">0</span></div>
@@ -158,15 +121,16 @@
             <p>최종 점수: <span id="final-score">0</span></p>
             <button id="retry-btn" style="padding:10px 20px; cursor:pointer;">다시 도전</button>
         </div>
-       <div id="ending-layer">
-    <div id="ending-gif-container">
-        <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
+        <div id="ending-layer">
+            <div id="ending-gif-container">
+                <img src="asset/thank.gif" style="max-width: 100%; height: auto;">
+            </div>
+            <div id="ending-img-container">
+                <img src="asset/ending.jpg" alt="Ending Image">
+                <button id="back-to-game">↩️</button>
+            </div>
+        </div>
     </div>
-    <div id="ending-img-container">
-        <img src="asset/ending.jpg">
-        <button id="back-to-game">↩️</button>
-    </div>
-</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="main.js"></script>
 </body>
