@@ -197,7 +197,6 @@ Events.on(engine, 'afterUpdate', () => {
                 setTimeout(startEndingSequence, 500);
             }
         }
-    }
 
     // 게임 오버 체크
     if (!isGameOver) {
