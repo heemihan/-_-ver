@@ -24,11 +24,12 @@ const render = Render.create({
     options: { width: 400, height: 600, wireframes: false, background: 'transparent' }
 });
 
+// 벽 좁히기 적용 (좌측 50, 우측 350)
 const wallOptions = { isStatic: true, friction: 0, render: { visible: false } };
 Composite.add(world, [
     Bodies.rectangle(200, 580, 400, 40, wallOptions),
-    Bodies.rectangle(20, 300, 20, 600, wallOptions),
-    Bodies.rectangle(380, 300, 20, 600, wallOptions)
+    Bodies.rectangle(50, 300, 20, 600, wallOptions), 
+    Bodies.rectangle(350, 300, 20, 600, wallOptions)
 ]);
 
 function createFruit(x, y, level, isStatic = false) {
@@ -37,14 +38,16 @@ function createFruit(x, y, level, isStatic = false) {
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     const texturePath = `./asset/${prefix}${indexStr}.png`;
 
-  const fruit = Bodies.circle(x, y, fruitData.radius, {
+    const fruit = Bodies.circle(x, y, fruitData.radius, {
         label: 'fruit_' + level,
         isStatic: isStatic,
         restitution: 0.3,
+        friction: 0.1,
         render: { sprite: { texture: texturePath, xScale: 1, yScale: 1 } }
     });
 
     fruit.spawnTime = Date.now();
+    fruit.isMerging = false;
 
     const img = new Image();
     img.src = texturePath;
@@ -64,66 +67,44 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// 엔딩 시퀀스 함수 (독립적으로 선언)
 function startEndingSequence() {
     if (isGameOver && document.getElementById('ending-layer').style.display === 'block') return;
     isGameOver = true;
-
-    // 1. 배경 갈라짐
     document.getElementById('bg-left').classList.add('split-left');
     document.getElementById('bg-right').classList.add('split-right');
-
     setTimeout(() => {
         const endingLayer = document.getElementById('ending-layer');
         const gifContainer = document.getElementById('ending-gif-container');
         const imgContainer = document.getElementById('ending-img-container');
         const backBtn = document.getElementById('back-to-game');
-
-        // 2. GIF 레이어 표시
         endingLayer.style.display = 'block';
-
-        // 3. 3초 후 JPG로 전환
         setTimeout(() => {
-            gifContainer.style.display = 'none'; // GIF 숨김
-            imgContainer.style.display = 'flex'; // JPG 컨테이너를 flex로 표시
-            
-            // 중요: display: flex가 적용된 후 투명도를 조절해야 애니메이션이 작동합니다.
-            setTimeout(() => {
-                imgContainer.style.opacity = '1';
-            }, 100); 
-
-            // 4. JPG가 나타나기 시작한 후 3초 뒤에 버튼 등장
+            gifContainer.style.display = 'none';
+            imgContainer.style.display = 'flex';
+            setTimeout(() => { imgContainer.style.opacity = '1'; }, 100);
             setTimeout(() => {
                 backBtn.style.display = 'block';
-                setTimeout(() => {
-                    backBtn.style.opacity = '1';
-                }, 100);
+                setTimeout(() => { backBtn.style.opacity = '1'; }, 100);
             }, 3000);
-
-        }, 3000); // GIF 노출 시간
+        }, 3000);
     }, 1200);
 }
 
-// 스킨 버튼 리스너 (괄호 오류 수정됨)
+// 스킨 변경 로직
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
-  currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
+    currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
-    
     const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
     if (currentFruit) allFruits.push(currentFruit);
-
     allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
-        const indexStr = String(level - 1).padStart(2, '0');
-        const texturePath = `./asset/${prefix}${indexStr}.png`;
-        const fruitData = FRUITS[level - 1];
-
-        body.render.sprite.texture = texturePath;
+        const texturePath = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
         const img = new Image();
         img.src = texturePath;
         img.onload = function() {
-            const scale = (fruitData.radius * 2) / img.width;
+            body.render.sprite.texture = texturePath;
+            const scale = (FRUITS[level - 1].radius * 2) / img.width;
             body.render.sprite.xScale = scale * 1.05;
             body.render.sprite.yScale = scale * 1.05;
         };
@@ -141,7 +122,8 @@ const handleMove = (e) => {
         let x = clientX - rect.left;
         const level = parseInt(currentFruit.label.split('_')[1]);
         const radius = FRUITS[level - 1].radius;
-        x = Math.max(radius + 25, Math.min(375 - radius, x));
+        // 좁아진 벽 범위 적용 (60~340)
+        x = Math.max(radius + 60, Math.min(340 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
 };
@@ -178,33 +160,30 @@ Events.on(engine, 'collisionStart', (event) => {
 Events.on(engine, 'afterUpdate', () => {
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
-        if (Composite.allBodies(world).includes(bodyA)) {
+        if (Composite.allBodies(world).includes(bodyA) && Composite.allBodies(world).includes(bodyB)) {
             Composite.remove(world, [bodyA, bodyB]);
-            const nextLevel = level + 1;
-            Composite.add(world, createFruit(x, y, nextLevel));
+            Composite.add(world, createFruit(x, y, level + 1));
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
-            if (nextLevel === 11) setTimeout(startEndingSequence, 500);
+            if (level + 1 === 11) setTimeout(startEndingSequence, 500);
         }
     }
-    if (!isGameOver) {
-    const fruits = Composite.allBodies(world).filter(b => 
-        b.label && b.label.startsWith('fruit_') && !b.isStatic
-    );
 
-    for (let fruit of fruits) {
-        if (fruit.position.y < 120 && fruit.velocity.y > -0.1 && Math.abs(fruit.velocity.y) < 0.2) {
-            if (!fruit.spawnTime || Date.now() - fruit.spawnTime > 1000) {
-                isGameOver = true;
-                document.getElementById('game-over').style.display = 'block';
-                document.getElementById('final-score').innerText = score;
-                break;
+    if (!isGameOver) {
+        const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
+        for (let fruit of fruits) {
+            if (fruit.position.y < 120 && fruit.velocity.y > -0.5) {
+                if (Date.now() - (fruit.spawnTime || 0) > 1500) {
+                    isGameOver = true;
+                    document.getElementById('game-over').style.display = 'block';
+                    document.getElementById('final-score').innerText = score;
+                    break;
+                }
             }
         }
     }
-}
+});
 
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
 spawnFruit();
-
