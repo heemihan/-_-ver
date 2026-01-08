@@ -200,5 +200,4 @@ Events.on(engine, 'afterUpdate', () => {
 Render.run(render);
 Runner.run(Runner.create({ isFixed: true }), engine);
 spawnFruit();
-startEndingSequence();
 
