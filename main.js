@@ -37,12 +37,14 @@ function createFruit(x, y, level, isStatic = false) {
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
     const texturePath = `./asset/${prefix}${indexStr}.png`;
 
-    const fruit = Bodies.circle(x, y, fruitData.radius, {
+  const fruit = Bodies.circle(x, y, fruitData.radius, {
         label: 'fruit_' + level,
         isStatic: isStatic,
         restitution: 0.3,
         render: { sprite: { texture: texturePath, xScale: 1, yScale: 1 } }
     });
+
+    fruit.spawnTime = Date.now();
 
     const img = new Image();
     img.src = texturePath;
