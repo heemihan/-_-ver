@@ -109,9 +109,21 @@ const handleMove = (e) => {
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
 };
+document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
+
+const handleMove = (e) => {
+    if (currentFruit && canDrop && !isGameOver) {
+        const rect = container.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let x = clientX - rect.left;
+        const radius = FRUITS[parseInt(currentFruit.label.split('_')[1]) - 1].radius;
+        x = Math.max(radius + 25, Math.min(375 - radius, x));
+        Body.setPosition(currentFruit, { x: x, y: 80 });
+    }
+};
 
 const handleDrop = (e) => {
-    if (e.target.closest('.top-btn-group') || e.target.tagName === 'BUTTON') return;
+    if (e.target.closest('.top-btn-group')) return; // 버튼 클릭 시 낙하 방지
     if (currentFruit && canDrop && !isGameOver) {
         canDrop = false;
         Body.setStatic(currentFruit, false);
@@ -122,7 +134,7 @@ const handleDrop = (e) => {
 
 container.addEventListener('mousemove', handleMove);
 container.addEventListener('mousedown', handleDrop);
-container.addEventListener('touchstart', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
+container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', handleDrop);
 
 Events.on(engine, 'collisionStart', (event) => {
