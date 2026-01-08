@@ -213,9 +213,9 @@ Events.on(engine, 'afterUpdate', () => {
             document.getElementById('final-score').innerText = score;
             document.getElementById('game-over').style.display = 'block';
             break;
+           }
         }
     }
-}
 });
 
 Render.run(render);
