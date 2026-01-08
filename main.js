@@ -63,17 +63,22 @@ function spawnFruit() {
     canDrop = true;
 }
 
-// 스킨 및 리셋 버튼 리스너
+// 스킨 변경 로직: 실시간 모든 오브젝트 및 대기 과일 텍스처 교체
 document.getElementById('skin-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     currentSkinType = (currentSkinType === 'A') ? 'B' : 'A';
     const prefix = (currentSkinType === 'A') ? 'fruit' : 'skinB_fruit';
+    
+    // 1. 월드에 있는 모든 과일 리스트 확보
+    const allFruits = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
+    
+    // 2. 현재 조작 중인(대기 중인) 과일도 리스트에 추가
+    if (currentFruit) {
+        allFruits.push(currentFruit);
+    }
 
-    const allBodies = Composite.allBodies(world).filter(body => body.label && body.label.startsWith('fruit_'));
-    if (currentFruit) allBodies.push(currentFruit);
-    if (currentFruit) allFruits.push(currentFruit);
-
-   allBodies.forEach(body => {
+    // 3. 모든 과일의 이미지와 스케일 업데이트
+    allFruits.forEach(body => {
         const level = parseInt(body.label.split('_')[1]);
         const indexStr = String(level - 1).padStart(2, '0');
         const texturePath = `./asset/${prefix}${indexStr}.png`;
@@ -91,35 +96,27 @@ document.getElementById('skin-btn').addEventListener('click', (e) => {
     });
 });
 
-img.onerror = () => {
-            console.error("이미지를 찾을 수 없습니다:", texturePath);
-    
-    Composite.allBodies(world).forEach(body => {
-        if (body.label && body.label.startsWith('fruit_')) {
-            const level = parseInt(body.label.split('_')[1]);
-            body.render.sprite.texture = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
-        }
-    });
-
-    if (currentFruit) {
-        const level = parseInt(currentFruit.label.split('_')[1]);
-        currentFruit.render.sprite.texture = `./asset/${prefix}${String(level - 1).padStart(2, '0')}.png`;
-    }
-});
+function startEndingSequence() {
+    isGameOver = true;
+    document.getElementById('ending-layer').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('ending-gif-container').style.display = 'none';
+        document.getElementById('ending-img-container').style.display = 'block';
+    }, 3000);
+}
 
 document.getElementById('reset-btn').onclick = (e) => { e.stopPropagation(); location.reload(); };
 document.getElementById('retry-btn').onclick = () => location.reload();
 document.getElementById('back-to-game').onclick = () => location.reload();
 
-// 입력 제어
 const handleMove = (e) => {
     if (currentFruit && canDrop && !isGameOver) {
-        if (e.cancelable) e.preventDefault();
         const rect = container.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let x = clientX - rect.left;
-        const radius = FRUITS[parseInt(currentFruit.label.split('_')[1]) - 1].radius;
-        x = Math.max(radius + 20, Math.min(380 - radius, x));
+        const level = parseInt(currentFruit.label.split('_')[1]);
+        const radius = FRUITS[level - 1].radius;
+        x = Math.max(radius + 25, Math.min(375 - radius, x));
         Body.setPosition(currentFruit, { x: x, y: 80 });
     }
 };
@@ -136,23 +133,8 @@ const handleDrop = (e) => {
 
 container.addEventListener('mousemove', handleMove);
 container.addEventListener('mousedown', handleDrop);
-container.addEventListener('touchmove', handleMove, { passive: false });
+container.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
 container.addEventListener('touchend', handleDrop);
-
-// 엔딩 연출 (갈라짐 애니메이션)
-function startEndingSequence() {
-    isGameOver = true;
-    document.getElementById('bg-left').classList.add('split-left');
-    document.getElementById('bg-right').classList.add('split-right');
-
-    setTimeout(() => {
-        document.getElementById('ending-layer').style.display = 'block';
-        setTimeout(() => {
-            document.getElementById('ending-gif-container').style.display = 'none';
-            document.getElementById('ending-img-container').style.display = 'block';
-        }, 3000);
-    }, 1200);
-}
 
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
@@ -180,7 +162,6 @@ Events.on(engine, 'afterUpdate', () => {
             if (nextLevel === 11) setTimeout(startEndingSequence, 500);
         }
     }
-    // 게임오버 체크
     if (!isGameOver && !canDrop) {
         const fruits = Composite.allBodies(world).filter(b => b.label && b.label.startsWith('fruit_') && !b.isStatic);
         for (let fruit of fruits) {
