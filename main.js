@@ -146,7 +146,7 @@ Events.on(engine, 'afterUpdate', () => {
             Composite.add(world, nextFruit);
             score += FRUITS[level - 1].score;
             document.getElementById('score').innerText = score;
-            if (nextLevel === 11) setTimeout(startEndingSequence, 500);
+            if (nextLevel === 5) setTimeout(startEndingSequence, 500);
         }
     }
 
