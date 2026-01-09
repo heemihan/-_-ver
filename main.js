@@ -133,6 +133,8 @@ Events.on(engine, 'collisionStart', (event) => {
     });
 });
 
+let overTime = 0;
+
 Events.on(engine, 'afterUpdate', () => {
     while (mergeQueue.length > 0) {
         const { bodyA, bodyB, level, x, y } = mergeQueue.shift();
@@ -152,15 +154,27 @@ Events.on(engine, 'afterUpdate', () => {
         const fruits = Composite.allBodies(world).filter(b => 
             b.label && b.label.startsWith('fruit_') && !b.isStatic && b !== currentFruit
         );
+        
+        let isOverflowing = false;
+
         for (let fruit of fruits) {
-            const age = Date.now() - (fruit.spawnTime || 0);
-            if (age > 3500 && fruit.position.y < 100) {
-                if (Math.abs(fruit.velocity.y) < 0.1) {
-                    isGameOver = true;
-                    document.getElementById('final-score').innerText = score;
-                    document.getElementById('game-over').style.display = 'block';
-                }
+            // Y축 100 미만(상단)에 과일이 위치하는지 확인
+            if (fruit.position.y < 100) {
+                isOverflowing = true;
+                break;
             }
+        }
+
+        if (isOverflowing) {
+            overTime += 1; // 과일이 상단에 있으면 카운트 증가
+            // 약 2~3초간 계속 상단에 머물러 있을 때만 게임 오버 (60프레임 기준 120~180)
+            if (overTime > 150) { 
+                isGameOver = true;
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('game-over').style.display = 'block';
+            }
+        } else {
+            overTime = 0; // 과일이 내려가면 카운트 초기화
         }
     }
 });
